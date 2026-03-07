@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 3D 视图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        #canvas { width: 100vw; height: 100vh; display: block; }
+        #ui { position: absolute; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px; }
+        #info { position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; }
+        .stat { margin: 10px 0; }
+        .stat-label { font-size: 0.875rem; color: #aaa; }
+        .stat-value { font-size: 1.25rem; font-weight: bold; color: #6200ee; }
+        #controls { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px; color: white; }
+        .control-item { margin: 10px 0; }
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+        h2 { font-size: 1rem; margin-bottom: 0.5rem; color: #6200ee; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="ui">
+        <h1>🌍 硅基世界</h1>
+        <div class="stat">
+            <div class="stat-label">位置</div>
+            <div class="stat-value" id="position">0, 0, 0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value" id="fps">60</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">实体数</div>
+            <div class="stat-value" id="entities">0</div>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <h2>控制</h2>
+        <div class="control-item">WASD - 移动</div>
+        <div class="control-item">鼠标 - 视角</div>
+        <div class="control-item">空格 - 跳跃</div>
+        <div class="control-item">Shift - 加速</div>
+    </div>
+    
+    <div id="info">
+        <div class="stat-label">点击画布开始</div>
+    </div>
+    
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.160.0';
+        import { PointerLockControls } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+        
+        // 场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 100, 500);
+        
+        // 相机
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 10, 20);
+        
+        // 渲染器
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        
+        // 控制器
+        const controls = new PointerLockControls(camera, document.body);
+        
+        document.addEventListener('click', () => {
+            controls.lock();
+        });
+        
+        controls.addEventListener('lock', () => {
+            document.getElementById('info').style.display = 'none';
+        });
+        
+        controls.addEventListener('unlock', () => {
+            document.getElementById('info').style.display = 'block';
+        });
+        
+        // 光照
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(50, 100, 50);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        // 地面
+        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // 添加一些建筑物
+        const buildings = [];
+        for (let i = 0; i < 20; i++) {
+            const height = Math.random() * 20 + 10;
+            const geometry = new THREE.BoxGeometry(10, height, 10);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: new THREE.Color().setHSL(Math.random(), 0.7, 0.5)
+            });
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(
+                (Math.random() - 0.5) * 150,
+                height / 2,
+                (Math.random() - 0.5) * 150
+            );
+            building.castShadow = true;
+            building.receiveShadow = true;
+            scene.add(building);
+            buildings.push(building);
+        }
+        
+        // 移动控制
+        const moveState = { forward: false, backward: false, left: false, right: false, sprint: false };
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        
+        document.addEventListener('keydown', (event) => {
+            switch (event.code) {
+                case 'KeyW': moveState.forward = true; break;
+                case 'KeyS': moveState.backward = true; break;
+                case 'KeyA': moveState.left = true; break;
+                case 'KeyD': moveState.right = true; break;
+                case 'ShiftLeft': moveState.sprint = true; break;
+                case 'Space': velocity.y += 15; break;
+            }
+        });
+        
+        document.addEventListener('keyup', (event) => {
+            switch (event.code) {
+                case 'KeyW': moveState.forward = false; break;
+                case 'KeyS': moveState.backward = false; break;
+                case 'KeyA': moveState.left = false; break;
+                case 'KeyD': moveState.right = false; break;
+                case 'ShiftLeft': moveState.sprint = false; break;
+            }
+        });
+        
+        // FPS 计数
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fps = 60;
+        
+        // 动画循环
+        let prevTime = performance.now();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // FPS 计算
+            frameCount++;
+            const currentTime = performance.now();
+            if (currentTime - lastTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastTime = currentTime;
+                document.getElementById('fps').textContent = fps;
+            }
+            
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+            
+            if (controls.isLocked) {
+                // 移动
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                velocity.y -= 9.8 * 5.0 * delta;
+                
+                direction.z = Number(moveState.forward) - Number(moveState.backward);
+                direction.x = Number(moveState.right) - Number(moveState.left);
+                direction.normalize();
+                
+                const speed = moveState.sprint ? 120.0 : 60.0;
+                if (moveState.forward || moveState.backward) velocity.z -= direction.z * speed * delta;
+                if (moveState.left || moveState.right) velocity.x -= direction.x * speed * delta;
+                
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                camera.position.y += velocity.y * delta;
+                
+                // 地面碰撞
+                if (camera.position.y < 10) {
+                    velocity.y = 0;
+                    camera.position.y = 10;
+                }
+                
+                // 更新 UI
+                document.getElementById('position').textContent = 
+                    `${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)}`;
+                document.getElementById('entities').textContent = buildings.length + 1;
+            }
+            
+            prevTime = time;
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        console.log('3D 世界已加载');
+        console.log('实体数:', buildings.length + 1);
+    </script>
+</body>
+</html>
