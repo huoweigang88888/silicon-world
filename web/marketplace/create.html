@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建 NFT - 硅基世界</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+        .navbar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .form-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .form-title { font-size: 2rem; font-weight: bold; margin-bottom: 2rem; color: #333; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 500; }
+        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .form-textarea { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; min-height: 150px; }
+        .form-select { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .upload-area { border: 2px dashed #667eea; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .upload-area:hover { background: #f9f9f9; border-color: #5568d3; }
+        .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .success-message { background: #48bb78; color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;">
+            <a href="index.html" style="text-decoration: none; color: #667eea; font-weight: bold;">← 返回市场</a>
+            <span style="font-weight: bold; color: #667eea;">🌍 硅基世界</span>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="form-card">
+            <h1 class="form-title">创建 NFT</h1>
+            
+            <div class="success-message" id="successMessage">
+                ✅ NFT 创建成功！即将跳转到详情页...
+            </div>
+            
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">NFT 类型</label>
+                    <select class="form-select" required>
+                        <option value="">选择类型</option>
+                        <option value="land">土地</option>
+                        <option value="building">建筑</option>
+                        <option value="item">物品</option>
+                        <option value="artwork">艺术品</option>
+                        <option value="identity">身份</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">NFT 名称</label>
+                    <input type="text" class="form-input" placeholder="例如：中心城地块 #001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">描述</label>
+                    <textarea class="form-textarea" placeholder="描述你的 NFT..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">上传文件</label>
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📁</div>
+                        <div>点击或拖拽文件到此处</div>
+                        <div style="color: #999; font-size: 0.875rem; margin-top: 0.5rem;">支持 JPG, PNG, GIF, MP4 (最大 10MB)</div>
+                    </div>
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*,video/*">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">价格 (SIL)</label>
+                    <input type="number" class="form-input" placeholder="0" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">版税 (%)</label>
+                    <input type="number" class="form-input" placeholder="5" value="5" max="10" step="0.1">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">创建 NFT</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                alert('文件已选择：' + e.target.files[0].name);
+            }
+        });
+    </script>
+</body>
+</html>
