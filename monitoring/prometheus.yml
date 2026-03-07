@@ -1,0 +1,22 @@
+# Prometheus 监控配置
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# 抓取配置
+scrape_configs:
+  # 硅基世界 API
+  - job_name: 'silicon-world'
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: '/metrics'
+  
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['db:5432']
+  
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
