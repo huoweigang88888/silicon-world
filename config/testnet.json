@@ -1,0 +1,63 @@
+{
+  "network": {
+    "name": "Goerli Testnet",
+    "chainId": 5,
+    "rpcUrl": "https://goerli.infura.io/v3/YOUR_INFURA_KEY",
+    "explorerUrl": "https://goerli.etherscan.io",
+    "currency": {
+      "name": "GoerliETH",
+      "symbol": "GoerliETH",
+      "decimals": 18
+    }
+  },
+  "contracts": {
+    "SILICONToken": {
+      "path": "src/blockchain/contracts/SILICONToken.sol",
+      "args": [],
+      "deployed": false,
+      "address": null
+    },
+    "WorldNFT": {
+      "path": "src/blockchain/contracts/WorldNFT.sol",
+      "args": [],
+      "deployed": false,
+      "address": null
+    },
+    "Marketplace": {
+      "path": "src/blockchain/contracts/Marketplace.sol",
+      "args": [],
+      "deployed": false,
+      "address": null
+    }
+  },
+  "deployment": {
+    "deployer": "0xYOUR_DEPLOYER_ADDRESS",
+    "gasPrice": "20000000000",
+    "gasLimit": "5000000",
+    "confirmations": 2
+  },
+  "api": {
+    "baseUrl": "https://api-testnet.silicon.world",
+    "wsUrl": "wss://ws-testnet.silicon.world",
+    "corsOrigins": [
+      "https://testnet.silicon.world",
+      "https://marketplace-testnet.silicon.world"
+    ]
+  },
+  "database": {
+    "host": "db-testnet.silicon.world",
+    "port": 5432,
+    "name": "silicon_world_testnet",
+    "ssl": true
+  },
+  "redis": {
+    "host": "redis-testnet.silicon.world",
+    "port": 6379,
+    "ssl": false
+  },
+  "monitoring": {
+    "enabled": true,
+    "endpoint": "https://monitoring-testnet.silicon.world",
+    "alertEmail": "alerts@silicon.world"
+  }
+}
