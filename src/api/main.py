@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.blockchain.did import DIDManager
+from src.api.routes.identity import router as identity_router
 
 
 # 创建 FastAPI 应用
@@ -37,6 +38,9 @@ app.add_middleware(
 
 # 初始化 DID 管理器
 did_manager = DIDManager()
+
+# 注册路由
+app.include_router(identity_router)
 
 
 # 数据模型
