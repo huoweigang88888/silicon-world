@@ -1,0 +1,57 @@
+services:
+  # API 服务
+  api:
+    image: python:3.11-slim
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/silicon_world
+      - REDIS_URL=redis://redis:6379
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "pip install fastapi uvicorn sqlalchemy python-dotenv psycopg2-binary redis loguru httpx aiohttp python-multipart pydantic pydantic-settings &&
+             python -c 'from src.core.database import init_db; init_db()' &&
+             uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
+    restart: unless-stopped
+
+  # PostgreSQL 数据库
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=silicon_world
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

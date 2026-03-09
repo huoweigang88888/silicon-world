@@ -1,0 +1,22 @@
+# 硅基世界 - 本地测试依赖 (简化版)
+# 使用 SQLite，无需 PostgreSQL/Redis
+
+# Web 框架
+fastapi
+uvicorn
+python-multipart
+
+# 数据验证 (使用较新版本，支持 Python 3.13)
+pydantic>=2.6.0
+pydantic-settings
+
+# 数据库 (SQLite 内置，只需 SQLAlchemy)
+sqlalchemy
+
+# 工具库
+python-dotenv
+httpx
+aiohttp
+
+# 日志
+loguru

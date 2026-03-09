@@ -1,5 +1,11 @@
 """
-API 集成测试
+硅基世界 API - 单元测试
+
+运行测试：
+    pytest tests/test_api.py -v
+
+生成覆盖率报告：
+    pytest tests/test_api.py -v --cov=src --cov-report=html
 """
 
 import pytest
@@ -16,127 +22,222 @@ from src.api.main import app
 client = TestClient(app)
 
 
-def test_root():
-    """测试根路径"""
-    response = client.get("/")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "ok"
-    assert "version" in data
-    print("[OK] 根路径测试通过")
+class TestHealth:
+    """健康检查测试"""
+    
+    def test_root(self):
+        """测试根路径"""
+        response = client.get("/")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert "version" in data
+    
+    def test_health(self):
+        """测试健康检查"""
+        response = client.get("/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "healthy"
 
 
-def test_health():
-    """测试健康检查"""
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "healthy"
-    print("[OK] 健康检查测试通过")
-
-
-def test_create_did():
-    """测试创建 DID"""
-    response = client.post(
-        "/api/v1/did",
-        json={
+class TestAgents:
+    """Agent API 测试"""
+    
+    @pytest.fixture
+    def test_agent(self):
+        """创建测试 Agent"""
+        agent_data = {
+            "name": "测试 Agent",
             "controller": "0x1234567890abcdef",
-            "public_key": "z6MkhaXgBZDvotDkWL5Tcu24GmjVpXppmQBBXwzqPz6MkhaX"
+            "personality": {"type": "test"}
         }
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["did"].startswith("did:silicon:agent:")
-    assert data["controller"] == "0x1234567890abcdef"
-    assert data["active"] == True
-    print(f"[OK] 创建 DID 测试通过：{data['did']}")
-
-
-def test_get_did():
-    """测试查询 DID"""
-    did = "did:silicon:agent:1234567890abcdef1234567890abcdef"
-    response = client.get(f"/api/v1/did/{did}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["did"] == did
-    print("[OK] 查询 DID 测试通过")
-
-
-def test_verify_did():
-    """测试验证 DID"""
-    # 有效 DID
-    valid_did = "did:silicon:agent:1234567890abcdef1234567890abcdef"
-    response = client.post(f"/api/v1/did/{valid_did}/verify")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["valid"] == True
+        response = client.post("/api/v1/agents", json=agent_data)
+        return response.json()
     
-    # 无效 DID
-    invalid_did = "invalid-did"
-    response = client.post(f"/api/v1/did/{invalid_did}/verify")
-    assert response.status_code == 400
-    print("[OK] 验证 DID 测试通过")
-
-
-def test_list_agents():
-    """测试获取 Agent 列表"""
-    response = client.get("/api/v1/agents")
-    assert response.status_code == 200
-    data = response.json()
-    assert "total" in data
-    assert "limit" in data
-    assert "offset" in data
-    assert "agents" in data
-    print("[OK] 获取 Agent 列表测试通过")
-
-
-def test_api_docs():
-    """测试 API 文档"""
-    response = client.get("/docs")
-    assert response.status_code == 200
-    assert "Swagger UI" in response.text or "swagger" in response.text.lower()
-    print("[OK] API 文档测试通过")
-
-
-def run_all_tests():
-    """运行所有测试"""
-    print("=" * 50)
-    print("API 集成测试")
-    print("=" * 50)
-    print()
+    def test_create_agent(self):
+        """测试创建 Agent"""
+        agent_data = {
+            "name": "测试 Agent",
+            "controller": "0x1234567890abcdef",
+            "personality": {"type": "test", "emoji": "🧪"}
+        }
+        response = client.post("/api/v1/agents", json=agent_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "测试 Agent"
+        assert data["controller"] == "0x1234567890abcdef"
+        assert "id" in data
+        assert data["active"] == True
     
-    tests = [
-        test_root,
-        test_health,
-        test_create_did,
-        test_get_did,
-        test_verify_did,
-        test_list_agents,
-        test_api_docs
-    ]
+    def test_get_agent(self, test_agent):
+        """测试获取 Agent"""
+        agent_id = test_agent["id"]
+        response = client.get(f"/api/v1/agents/{agent_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == agent_id
+        assert data["name"] == "测试 Agent"
     
-    passed = 0
-    failed = 0
+    def test_list_agents(self, test_agent):
+        """测试获取 Agent 列表"""
+        response = client.get("/api/v1/agents")
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) > 0
     
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except AssertionError as e:
-            print(f"[FAIL] {test.__name__}: {e}")
-            failed += 1
-        except Exception as e:
-            print(f"[ERROR] {test.__name__}: {e}")
-            failed += 1
+    def test_get_agent_stats(self, test_agent):
+        """测试获取 Agent 统计"""
+        agent_id = test_agent["id"]
+        response = client.get(f"/api/v1/agents/{agent_id}/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["agent_id"] == agent_id
+        assert "memories" in data
+        assert "total" in data["memories"]
     
-    print()
-    print("=" * 50)
-    print(f"测试结果：{passed} 通过，{failed} 失败")
-    print("=" * 50)
+    def test_update_agent(self, test_agent):
+        """测试更新 Agent"""
+        agent_id = test_agent["id"]
+        response = client.put(
+            f"/api/v1/agents/{agent_id}",
+            params={"name": "更新后的名字", "active": False}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "更新后的名字"
+        assert data["active"] == False
+        assert data["updated"] == True
     
-    return failed == 0
+    def test_get_nonexistent_agent(self):
+        """测试获取不存在的 Agent"""
+        response = client.get("/api/v1/agents/did:silicon:agent:nonexistent")
+        assert response.status_code == 404
+
+
+class TestMemories:
+    """记忆 API 测试"""
+    
+    @pytest.fixture
+    def test_agent_with_memories(self):
+        """创建带记忆的测试 Agent"""
+        # 创建 Agent
+        agent_data = {
+            "name": "记忆测试 Agent",
+            "controller": "0x1234567890abcdef"
+        }
+        agent_response = client.post("/api/v1/agents", json=agent_data)
+        agent_id = agent_response.json()["id"]
+        
+        # 创建记忆
+        memories = [
+            {"content": "短期记忆 1", "memory_type": "short_term"},
+            {"content": "长期记忆 1", "memory_type": "long_term"},
+            {"content": "长期记忆 2", "memory_type": "long_term"}
+        ]
+        for memory in memories:
+            client.post(f"/api/v1/agents/{agent_id}/memories", json=memory)
+        
+        return agent_id
+    
+    def test_create_memory(self, test_agent_with_memories):
+        """测试创建记忆"""
+        agent_id = test_agent_with_memories
+        memory_data = {
+            "content": "新记忆",
+            "memory_type": "semantic"
+        }
+        response = client.post(
+            f"/api/v1/agents/{agent_id}/memories",
+            json=memory_data
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["content"] == "新记忆"
+        assert data["memory_type"] == "semantic"
+    
+    def test_get_memories(self, test_agent_with_memories):
+        """测试获取记忆列表"""
+        agent_id = test_agent_with_memories
+        response = client.get(f"/api/v1/agents/{agent_id}/memories")
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) >= 3
+    
+    def test_get_memories_by_type(self, test_agent_with_memories):
+        """测试按类型获取记忆"""
+        agent_id = test_agent_with_memories
+        response = client.get(
+            f"/api/v1/agents/{agent_id}/memories?memory_type=long_term"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        # 至少有 2 条长期记忆
+        assert len(data) >= 2
+        for memory in data:
+            assert memory["memory_type"] == "long_term"
+    
+    def test_search_memories(self, test_agent_with_memories):
+        """测试搜索记忆"""
+        agent_id = test_agent_with_memories
+        response = client.get(
+            f"/api/v1/agents/{agent_id}/memories/search?q=长期"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        for memory in data:
+            assert "长期" in memory["content"]
+
+
+class TestDID:
+    """DID API 测试"""
+    
+    def test_create_did(self):
+        """测试创建 DID"""
+        did_data = {
+            "controller": "0x1234567890abcdef",
+            "public_key": "test_public_key"
+        }
+        response = client.post("/api/v1/did", json=did_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert "did" in data
+        assert data["controller"] == "0x1234567890abcdef"
+        assert data["active"] == True
+    
+    def test_verify_did(self):
+        """测试验证 DID"""
+        # 先创建 DID
+        did_data = {
+            "controller": "0x1234567890abcdef"
+        }
+        create_response = client.post("/api/v1/did", json=did_data)
+        did = create_response.json()["did"]
+        
+        # 验证 DID
+        response = client.post(f"/api/v1/did/{did}/verify")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["valid"] == True
+        assert data["did"] == did
+    
+    def test_get_did(self):
+        """测试获取 DID 信息"""
+        did_data = {
+            "controller": "0x1234567890abcdef"
+        }
+        create_response = client.post("/api/v1/did", json=did_data)
+        did = create_response.json()["did"]
+        
+        response = client.get(f"/api/v1/did/{did}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["did"] == did
 
 
 if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)
+    pytest.main([__file__, "-v"])

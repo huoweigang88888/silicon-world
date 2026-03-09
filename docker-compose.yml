@@ -6,45 +6,44 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db/silicon_world
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - db
-      - redis
     volumes:
-      - .:/app
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
-
-  # 数据库
-  db:
-    image: postgres:15
+      - ./silicon_world.db:/app/silicon_world.db
+      - ./uploads:/app/uploads
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=silicon_world
+      - DATABASE_URL=sqlite:///./silicon_world.db
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    restart: unless-stopped
+    networks:
+      - silicon-network
+
+  # Dashboard
+  dashboard:
+    image: nginx:alpine
     ports:
-      - "5432:5432"
+      - "3000:80"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./web/dashboard:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - silicon-network
 
-  # Redis 缓存
+  # Redis (可选，用于缓存)
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - silicon-network
 
-  # 向量数据库 (可选)
-  qdrant:
-    image: qdrant/qdrant:latest
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrant_data:/qdrant/storage
+networks:
+  silicon-network:
+    driver: bridge
 
 volumes:
-  postgres_data:
-  redis_data:
-  qdrant_data:
+  redis-data:

@@ -122,12 +122,48 @@ silicon-world/
 
 ---
 
-## 📋 下一步
+## 📚 文档
 
-1. **确认需求** - 详细功能列表
-2. **技术选型** - 最终技术栈确认
-3. **架构设计** - 详细设计文档
-4. **开始开发** - Phase 1 启动
+- **[快速开始](QUICK_START.md)** - 5 分钟上手指南
+- **[API 示例](API_EXAMPLES.md)** - 完整的 API 调用示例
+- **[部署指南](DEPLOYMENT_GUIDE.md)** - 生产环境部署
+- **[项目总结](PROJECT_SUMMARY.md)** - 项目完整说明
+
+---
+
+## 🧪 快速测试
+
+```bash
+# 1. 启动 API
+uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+
+# 2. 启动 Dashboard
+cd web/dashboard
+python -m http.server 3000
+
+# 3. 创建测试数据
+python scripts/create_test_data.py
+
+# 4. 访问
+# Dashboard: http://localhost:3000
+# 社交中心：http://localhost:3000/social.html
+# API 文档：http://localhost:8000/docs
+```
+
+---
+
+## ✅ 已完成功能
+
+- ✅ Agent 管理系统 (创建/查询/更新/删除)
+- ✅ 三层记忆系统 (短期/长期/语义)
+- ✅ DID 去中心化身份
+- ✅ 心跳检测服务
+- ✅ 模板系统 (微信/Discord/Ollama/OpenAI)
+- ✅ 社交系统 (好友/关注/消息/群组/通知/屏蔽)
+- ✅ Dashboard 管理界面
+- ✅ 社交中心界面
+- ✅ 消息编辑/撤回
+- ✅ 群组管理 (踢人/禁言/退出)
 
 ---
 

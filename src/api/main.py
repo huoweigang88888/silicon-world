@@ -10,13 +10,53 @@ from typing import List, Optional
 from pydantic import BaseModel
 import sys
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.blockchain.did import DIDManager
 from src.api.routes.identity import router as identity_router
+from src.api.routes.agents import router as agents_router
+from src.api.routes.social import router as social_router
+from src.api.routes.websocket import router as websocket_router
+from src.api.routes.files import router as files_router
+from src.api.routes.a2a import router as a2a_router
+from src.api.routes.nexus_wallet import router as nexus_wallet_router
+from src.api.routes.performance import router as performance_router
+from src.api.routes.collab_tasks import router as collab_tasks_router
+from src.core.database import init_db
 
+
+# 生命周期管理
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用启动和关闭时的操作"""
+    # 启动时：初始化数据库和 A2A 服务端
+    print("[INFO] Initializing database...")
+    init_db()
+    print("[INFO] Database initialized")
+    
+    # 初始化 A2A 服务端
+    print("[INFO] Initializing A2A server...")
+    from src.a2a.server import SiliconWorldA2AServer
+    a2a_server = SiliconWorldA2AServer(app)
+    print(f"[INFO] A2A server initialized: {a2a_server.get_agent_card().name}")
+    
+    # 注册 WebSocket 路由
+    print("[INFO] Registering WebSocket routes...")
+    from src.a2a.websocket_tasks import register_websocket_routes
+    register_websocket_routes(app)
+    print("[INFO] WebSocket routes registered")
+    
+    yield
+    
+    # 关闭时：清理资源
+    print("[INFO] Shutting down service...")
+    await a2a_client.close()
+
+# 全局 A2A 服务端实例
+a2a_server = None
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -24,7 +64,8 @@ app = FastAPI(
     description="Agent 与人类的虚拟世界 - RESTful API",
     version="0.1.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # 配置 CORS
@@ -36,11 +77,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 添加 API 限流中间件
+from src.a2a.rate_limiter import RateLimitMiddleware
+app.add_middleware(RateLimitMiddleware)
+
 # 初始化 DID 管理器
 did_manager = DIDManager()
 
-# 注册路由
+# 注册路由 - agents 在前，避免路由冲突
+app.include_router(agents_router)
 app.include_router(identity_router)
+app.include_router(social_router)
+app.include_router(websocket_router)
+app.include_router(files_router)
+app.include_router(a2a_router)
+app.include_router(nexus_wallet_router)
+app.include_router(performance_router)
+app.include_router(collab_tasks_router)
 
 
 # 数据模型
@@ -153,32 +206,7 @@ async def verify_did(did: str):
     }
 
 
-@app.get("/api/v1/agents", tags=["Agent"])
-async def list_agents(limit: int = 10, offset: int = 0):
-    """
-    获取 Agent 列表
-    
-    - **limit**: 返回数量限制
-    - **offset**: 偏移量
-    """
-    # TODO: 从数据库查询
-    return {
-        "total": 0,
-        "limit": limit,
-        "offset": offset,
-        "agents": []
-    }
 
-
-@app.get("/api/v1/agents/{agent_id}", tags=["Agent"])
-async def get_agent(agent_id: str):
-    """
-    获取 Agent 信息
-    
-    - **agent_id**: Agent ID (DID)
-    """
-    # TODO: 从数据库查询
-    raise HTTPException(status_code=404, detail="Agent not found")
 
 
 # 启动信息

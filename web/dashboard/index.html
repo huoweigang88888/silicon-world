@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f0fdf4;
+            border-radius: 20px;
+            color: #16a34a;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #16a34a;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .agent-list {
+            list-style: none;
+        }
+
+        .agent-item {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .agent-item:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+
+        .agent-item.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .agent-id {
+            font-size: 12px;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .memory-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .memory-item {
+            padding: 15px;
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .memory-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .memory-content {
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .memory-date {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+            color: #475569;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 硅基世界 Dashboard</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="social.html" class="btn" style="text-decoration: none; display: inline-block;">💬 社交中心</a>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="statusText">API 运行中</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <button class="btn" onclick="showCreateAgent()">➕ 创建 Agent</button>
+                <button class="btn btn-secondary" onclick="loadAgents()">🔄 刷新列表</button>
+                
+                <h3 style="margin: 20px 0 10px; color: #475569;">Agent 列表</h3>
+                <ul class="agent-list" id="agentList">
+                    <li class="loading">加载中...</li>
+                </ul>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="main-content">
+                <!-- 统计卡片 -->
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statAgents">0</div>
+                        <div class="stat-label">Agent 数量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statOnline">0</div>
+                        <div class="stat-label">在线 Agent</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statMemories">0</div>
+                        <div class="stat-label">记忆总数</div>
+                    </div>
+                </div>
+                
+                <!-- 心跳控制 -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                    <button class="btn" onclick="checkAllHeartbeats()" style="width: auto; padding: 10px 20px;">💓 检测所有 Agent</button>
+                    <span id="heartbeatStatus" style="color: #64748b; font-size: 14px;"></span>
+                </div>
+
+                <!-- 选项卡 -->
+                <div class="tab-container">
+                    <button class="tab active" onclick="switchTab('overview')">📊 概览</button>
+                    <button class="tab" onclick="switchTab('memories')">💭 记忆</button>
+                    <button class="tab" onclick="switchTab('settings')">⚙️ 设置</button>
+                </div>
+
+                <!-- 概览 -->
+                <div id="tab-overview" class="tab-content active">
+                    <div id="overviewContent">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🤖</div>
+                            <h3>暂无 Agent</h3>
+                            <p>点击左侧"创建 Agent"开始使用</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 记忆 -->
+                <div id="tab-memories" class="tab-content">
+                    <div class="form-group">
+                        <label>搜索记忆</label>
+                        <input type="text" id="memorySearch" placeholder="输入关键词搜索..." onkeyup="searchMemories()">
+                    </div>
+                    <ul class="memory-list" id="memoryList">
+                        <li class="empty-state">
+                            <p>请先选择一个 Agent</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 设置 -->
+                <div id="tab-settings" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">API 配置</h3>
+                    <div class="form-group">
+                        <label>API 地址</label>
+                        <input type="text" id="apiUrl" value="http://localhost:8000">
+                    </div>
+                    <button class="btn" onclick="saveSettings()">💾 保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建 Agent 弹窗 -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>创建新 Agent</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="createAlert"></div>
+            <form onsubmit="createAgent(event)">
+                <div class="form-group">
+                    <label>名字 *</label>
+                    <input type="text" id="agentName" required placeholder="例如：硅基助手">
+                </div>
+                <div class="form-group">
+                    <label>控制者地址 *</label>
+                    <input type="text" id="agentController" required placeholder="0x 开头的钱包地址">
+                </div>
+                <div class="form-group">
+                    <label>Agent 类型 *</label>
+                    <select id="agentType" onchange="toggleConnectionFields()">
+                        <option value="native">原生 Agent (在硅基世界注册)</option>
+                        <option value="external">外部 Agent (已有 Agent 接入)</option>
+                    </select>
+                </div>
+                
+                <!-- 外部 Agent 连接配置 -->
+                <div id="connectionFields" style="display: none;">
+                    <div class="form-group">
+                        <label>API 端点</label>
+                        <input type="url" id="agentEndpoint" placeholder="https://your-bot.com/api">
+                    </div>
+                    <div class="form-group">
+                        <label>认证类型</label>
+                        <select id="authType">
+                            <option value="none">无需认证</option>
+                            <option value="bearer">Bearer Token</option>
+                            <option value="basic">Basic Auth</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>认证凭证</label>
+                        <input type="text" id="authValue" placeholder="Token 或密码">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>人格类型</label>
+                    <select id="agentPersonality">
+                        <option value="friendly">友好</option>
+                        <option value="professional">专业</option>
+                        <option value="creative">创意</option>
+                        <option value="analytical">分析型</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">✨ 创建</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API 基础地址
+        let API_URL = 'http://localhost:8000';
+        let currentAgent = null;
+        let agents = [];
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAgents();
+            loadHeartbeatStats();
+            checkHealth();
+            // 每 60 秒自动更新心跳统计
+            setInterval(loadHeartbeatStats, 60000);
+        });
+
+        // 检查 API 健康状态
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                document.getElementById('statusText').textContent = 'API 运行中';
+                document.querySelector('.status').style.background = '#f0fdf4';
+                document.querySelector('.status').style.color = '#16a34a';
+            } catch (error) {
+                document.getElementById('statusText').textContent = 'API 离线';
+                document.querySelector('.status').style.background = '#fef2f2';
+                document.querySelector('.status').style.color = '#dc2626';
+            }
+        }
+
+        // 加载 Agent 列表
+        async function loadAgents() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents`);
+                agents = await response.json();
+                
+                const list = document.getElementById('agentList');
+                list.innerHTML = '';
+
+                if (agents.length === 0) {
+                    list.innerHTML = '<li class="empty-state"><p>暂无 Agent</p></li>';
+                    document.getElementById('statAgents').textContent = '0';
+                    return;
+                }
+
+                agents.forEach(agent => {
+                    const li = document.createElement('li');
+                    li.className = 'agent-item';
+                    li.onclick = () => selectAgent(agent);
+                    li.innerHTML = `
+                        <div class="agent-name">${agent.name || '未命名'}</div>
+                        <div class="agent-id">${agent.id.substring(0, 30)}...</div>
+                    `;
+                    list.appendChild(li);
+                });
+
+                document.getElementById('statAgents').textContent = agents.length;
+            } catch (error) {
+                console.error('加载 Agent 失败:', error);
+                document.getElementById('agentList').innerHTML = '<li class="empty-state">加载失败</li>';
+            }
+        }
+
+        // 选择 Agent
+        function selectAgent(agent) {
+            currentAgent = agent;
+            
+            // 更新选中状态
+            document.querySelectorAll('.agent-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 显示概览
+            const overview = document.getElementById('overviewContent');
+            const agentTypeLabel = agent.agent_type === 'external' ? '🔗 外部' : '🤖 原生';
+            const statusLabel = agent.status || 'unknown';
+            const statusColors = {
+                'online': '✅ 在线',
+                'offline': '⚪ 离线',
+                'error': '❌ 错误',
+                'unknown': '❓ 未知'
+            };
+            
+            overview.innerHTML = `
+                <h2 style="margin-bottom: 20px;">${agent.name} <span style="font-size: 14px; color: #667eea;">${agentTypeLabel}</span></h2>
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <p><strong>ID:</strong> ${agent.id}</p>
+                    <p><strong>控制者:</strong> ${agent.controller}</p>
+                    <p><strong>创建时间:</strong> ${new Date(agent.created_at).toLocaleString('zh-CN')}</p>
+                    <p><strong>激活状态:</strong> ${agent.active ? '✅' : '❌'}</p>
+                    <p><strong>连接状态:</strong> ${statusColors[statusLabel] || statusLabel}</p>
+                    <p><strong>类型:</strong> ${agent.agent_type || 'native'}</p>
+                    ${agent.capabilities && agent.capabilities.length > 0 ? `<p><strong>能力:</strong> ${agent.capabilities.join(', ')}</p>` : ''}
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn" onclick="loadMemories()" style="flex: 1;">💭 加载记忆</button>
+                    ${agent.agent_type === 'external' ? `<button class="btn" onclick="testConnection('${agent.id}')" style="flex: 1;">🔌 测试连接</button>` : ''}
+                    <button class="btn btn-secondary" onclick="deleteAgent('${agent.id}')" style="flex: 1; background: #fee2e2; color: #dc2626;">🗑️ 删除</button>
+                </div>
+            `;
+
+            // 加载记忆
+            loadMemories();
+        }
+
+        // 加载记忆
+        async function loadMemories() {
+            if (!currentAgent) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/${currentAgent.id}/memories`);
+                const memories = await response.json();
+
+                const list = document.getElementById('memoryList');
+                list.innerHTML = '';
+
+                if (memories.length === 0) {
+                    list.innerHTML = '<li class="empty-state"><p>暂无记忆</p></li>';
+                    document.getElementById('statMemories').textContent = '0';
+                    return;
+                }
+
+                let totalMemories = 0;
+                memories.forEach(memory => {
+                    const li = document.createElement('li');
+                    li.className = 'memory-item';
+                    li.innerHTML = `
+                        <span class="memory-type">${getMemoryTypeLabel(memory.memory_type)}</span>
+                        <div class="memory-content">${memory.content}</div>
+                        <div class="memory-date">${new Date(memory.created_at).toLocaleString('zh-CN')}</div>
+                    `;
+                    list.appendChild(li);
+                    totalMemories++;
+                });
+
+                document.getElementById('statMemories').textContent = totalMemories;
+            } catch (error) {
+                console.error('加载记忆失败:', error);
+                document.getElementById('memoryList').innerHTML = '<li class="empty-state">加载失败</li>';
+            }
+        }
+
+        // 获取记忆类型标签
+        function getMemoryTypeLabel(type) {
+            const labels = {
+                'short_term': '短期记忆',
+                'long_term': '长期记忆',
+                'semantic': '语义记忆'
+            };
+            return labels[type] || type;
+        }
+
+        // 搜索记忆
+        async function searchMemories() {
+            if (!currentAgent) return;
+
+            const query = document.getElementById('memorySearch').value;
+            if (query.length < 2) {
+                loadMemories();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/${currentAgent.id}/memories/search?q=${encodeURIComponent(query)}`);
+                const memories = await response.json();
+
+                const list = document.getElementById('memoryList');
+                list.innerHTML = '';
+
+                if (memories.length === 0) {
+                    list.innerHTML = '<li class="empty-state"><p>未找到匹配的记忆</p></li>';
+                    return;
+                }
+
+                memories.forEach(memory => {
+                    const li = document.createElement('li');
+                    li.className = 'memory-item';
+                    li.innerHTML = `
+                        <span class="memory-type">${getMemoryTypeLabel(memory.memory_type)}</span>
+                        <div class="memory-content">${memory.content}</div>
+                        <div class="memory-date">${new Date(memory.created_at).toLocaleString('zh-CN')}</div>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error('搜索记忆失败:', error);
+            }
+        }
+
+        // 显示创建弹窗
+        function showCreateAgent() {
+            document.getElementById('createModal').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('createModal').classList.remove('show');
+            document.getElementById('createAlert').innerHTML = '';
+        }
+
+        // 创建 Agent
+        async function createAgent(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('agentName').value;
+            const controller = document.getElementById('agentController').value;
+            const personality = document.getElementById('agentPersonality').value;
+            const agentType = document.getElementById('agentType').value;
+            
+            const payload = {
+                name,
+                controller,
+                personality: { type: personality },
+                agent_type: agentType
+            };
+
+            // 如果是外部 Agent，添加连接配置
+            if (agentType === 'external') {
+                const endpoint = document.getElementById('agentEndpoint').value;
+                const authType = document.getElementById('authType').value;
+                const authValue = document.getElementById('authValue').value;
+                
+                if (endpoint) {
+                    payload.connection_info = {
+                        endpoint,
+                        auth_type: authType,
+                        auth: authValue
+                    };
+                }
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('createAlert').innerHTML = `
+                        <div class="alert alert-success">✅ 创建成功！</div>
+                    `;
+                    setTimeout(() => {
+                        closeModal();
+                        loadAgents();
+                        document.getElementById('agentName').value = '';
+                        document.getElementById('agentController').value = '';
+                        document.getElementById('agentEndpoint').value = '';
+                        document.getElementById('authValue').value = '';
+                    }, 1000);
+                } else {
+                    const error = await response.json();
+                    document.getElementById('createAlert').innerHTML = `
+                        <div class="alert alert-error">❌ 创建失败：${error.detail}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('createAlert').innerHTML = `
+                    <div class="alert alert-error">❌ 请求失败：${error.message}</div>
+                `;
+            }
+        }
+
+        // 删除 Agent
+        async function deleteAgent(agentId) {
+            if (!confirm('确定要删除这个 Agent 吗？此操作不可恢复。')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/${agentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('✅ 删除成功');
+                    loadAgents();
+                    document.getElementById('overviewContent').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🤖</div>
+                            <h3>暂无 Agent</h3>
+                            <p>点击左侧"创建 Agent"开始使用</p>
+                        </div>
+                    `;
+                    currentAgent = null;
+                } else {
+                    alert('❌ 删除失败');
+                }
+            } catch (error) {
+                alert('❌ 请求失败：' + error.message);
+            }
+        }
+
+        // 切换选项卡
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // 保存设置
+        function saveSettings() {
+            API_URL = document.getElementById('apiUrl').value;
+            alert('✅ 设置已保存');
+            checkHealth();
+        }
+
+        // 切换连接配置字段显示
+        function toggleConnectionFields() {
+            const type = document.getElementById('agentType').value;
+            const fields = document.getElementById('connectionFields');
+            fields.style.display = type === 'external' ? 'block' : 'none';
+        }
+
+        // 测试连接
+        async function testConnection(agentId) {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/${agentId}/test-connection`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ 连接成功！\n${data.message}`);
+                    // 重新加载 Agent 列表以更新状态
+                    loadAgents();
+                } else {
+                    alert(`❌ 连接失败\n${data.message}`);
+                }
+            } catch (error) {
+                alert(`❌ 测试失败：${error.message}`);
+            }
+        }
+
+        // 加载心跳统计
+        async function loadHeartbeatStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/heartbeat/stats`);
+                const stats = await response.json();
+                
+                document.getElementById('statOnline').textContent = stats.by_status.online || 0;
+                
+                // 更新状态文本
+                const total = stats.total_active || 0;
+                const online = stats.by_status.online || 0;
+                const offline = stats.by_status.offline || 0;
+                const error = stats.by_status.error || 0;
+                
+                document.getElementById('heartbeatStatus').textContent = 
+                    `总计：${total} | 在线：${online} | 离线：${offline} | 错误：${error}`;
+            } catch (error) {
+                console.error('加载心跳统计失败:', error);
+            }
+        }
+
+        // 检测所有 Agent
+        async function checkAllHeartbeats() {
+            const statusEl = document.getElementById('heartbeatStatus');
+            statusEl.textContent = '⏳ 检测中...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/v1/agents/heartbeat/check`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const successCount = result.results.filter(r => r.success).length;
+                    statusEl.textContent = `✅ 检测完成：${successCount}/${result.checked} 成功`;
+                    // 重新加载 Agent 列表和统计
+                    loadAgents();
+                    loadHeartbeatStats();
+                } else {
+                    statusEl.textContent = '❌ 检测失败';
+                }
+            } catch (error) {
+                statusEl.textContent = `❌ 检测失败：${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
