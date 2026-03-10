@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏 - 硅基世界 NFT 市场</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #667eea; }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header-left h1 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-left p { color: #666; }
+        
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .wallet-balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* 筛选器 */
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.25rem;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .search-input {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            min-width: 300px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* NFT 网格 */
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .nft-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nft-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nft-image {
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            position: relative;
+        }
+        
+        .nft-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .nft-info {
+            padding: 1.25rem;
+        }
+        
+        .nft-type {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .nft-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nft-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .nft-rarity {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .nft-acquired {
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-sell {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-sell:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-transfer {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-transfer:hover {
+            background: #e0e0e0;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 0.75rem;
+        }
+        
+        .empty-desc {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-browse {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 1rem; text-align: center; }
+            .filters { flex-direction: column; }
+            .search-input { width: 100%; }
+            .nft-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <a href="../dashboard/index.html" class="logo">🌍 硅基世界</a>
+            <div class="nav-links">
+                <a href="index.html">市场</a>
+                <a href="collection.html" class="active">我的 NFT</a>
+                <a href="create.html">创建</a>
+                <a href="activity.html">活动</a>
+            </div>
+        </nav>
+        
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-left">
+                <h1>🎨 我的收藏</h1>
+                <p>管理和查看您拥有的所有 NFT</p>
+            </div>
+            <div class="wallet-info">
+                <div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">钱包余额</div>
+                    <div class="wallet-balance" id="walletBalance">10,000 SIL</div>
+                </div>
+                <div style="font-size: 2rem;">👛</div>
+            </div>
+        </div>
+        
+        <!-- 统计 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalNFTs">0</div>
+                <div class="stat-label">总 NFT 数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalValue">0</div>
+                <div class="stat-label">总价值 (SIL)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="rareCount">0</div>
+                <div class="stat-label">稀有及以上</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="listedCount">0</div>
+                <div class="stat-label">上架出售</div>
+            </div>
+        </div>
+        
+        <!-- 筛选器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="land">🏠 土地</button>
+                <button class="filter-btn" data-filter="building">🏢 建筑</button>
+                <button class="filter-btn" data-filter="item">🎒 物品</button>
+                <button class="filter-btn" data-filter="artwork">🎨 艺术品</button>
+                <button class="filter-btn" data-filter="identity">🎭 身份</button>
+            </div>
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜索我的收藏...">
+        </div>
+        
+        <!-- NFT 网格 -->
+        <div class="nft-grid" id="nftGrid">
+            <!-- NFT 卡片由 JavaScript 动态生成 -->
+        </div>
+        
+        <!-- 空状态 (如果没有 NFT) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">📦</div>
+            <h2 class="empty-title">还没有收藏任何 NFT</h2>
+            <p class="empty-desc">去市场逛逛，发现属于你的独特数字资产吧！</p>
+            <a href="index.html" class="btn-browse">🛍️ 浏览市场</a>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟用户收藏的 NFT 数据
+        const myCollection = [
+            {
+                id: 1,
+                type: 'land',
+                typeName: '土地',
+                title: '中心城地块 #001',
+                image: '🏠',
+                rarity: 'legendary',
+                rarityName: '传说',
+                acquiredDate: '2026-03-08',
+                acquiredPrice: 500,
+                currentFloorPrice: 1000,
+                listed: false
+            },
+            {
+                id: 5,
+                type: 'item',
+                typeName: '物品',
+                title: '稀有道具 #789',
+                image: '🎒',
+                rarity: 'common',
+                rarityName: '普通',
+                acquiredDate: '2026-03-07',
+                acquiredPrice: 150,
+                currentFloorPrice: 200,
+                listed: true,
+                listPrice: 250
+            },
+            {
+                id: 7,
+                type: 'music',
+                typeName: '音乐',
+                title: '电子音轨 #001',
+                image: '🎵',
+                rarity: 'rare',
+                rarityName: '稀有',
+                acquiredDate: '2026-03-09',
+                acquiredPrice: 100,
+                currentFloorPrice: 150,
+                listed: false
+            },
+            {
+                id: 10,
+                type: 'artwork',
+                typeName: '艺术品',
+                title: '抽象画 #2026',
+                image: '🖼️',
+                rarity: 'rare',
+                rarityName: '稀有',
+                acquiredDate: '2026-03-06',
+                acquiredPrice: 1500,
+                currentFloorPrice: 2000,
+                listed: false
+            }
+        ];
+        
+        let currentFilter = 'all';
+        let searchQuery = '';
+        
+        // 渲染 NFT 卡片
+        function renderCollection() {
+            const grid = document.getElementById('nftGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            // 筛选
+            let filtered = myCollection;
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(nft => nft.type === currentFilter);
+            }
+            if (searchQuery) {
+                filtered = filtered.filter(nft => 
+                    nft.title.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            
+            // 更新统计
+            updateStats();
+            
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = filtered.map(nft => `
+                <div class="nft-card" onclick="viewNFT(${nft.id})">
+                    <div class="nft-image">
+                        ${nft.image}
+                        ${nft.listed ? '<span class="nft-badge">🏷️ 出售中</span>' : ''}
+                    </div>
+                    <div class="nft-info">
+                        <span class="nft-type">${nft.typeName}</span>
+                        <h3 class="nft-title">${nft.title}</h3>
+                        <div class="nft-footer">
+                            <div>
+                                <div class="nft-rarity">⭐ ${nft.rarityName}</div>
+                                <div class="nft-acquired">获取：${nft.acquiredDate}</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            ${nft.listed ? 
+                                `<button class="btn btn-transfer" onclick="event.stopPropagation(); cancelListing(${nft.id})">取消出售</button>` :
+                                `<button class="btn btn-sell" onclick="event.stopPropagation(); sellNFT(${nft.id})">出售</button>`
+                            }
+                            <button class="btn btn-transfer" onclick="event.stopPropagation(); transferNFT(${nft.id})">转移</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 更新统计
+        function updateStats() {
+            document.getElementById('totalNFTs').textContent = myCollection.length;
+            
+            const totalValue = myCollection.reduce((sum, nft) => sum + nft.currentFloorPrice, 0);
+            document.getElementById('totalValue').textContent = totalValue.toLocaleString();
+            
+            const rareCount = myCollection.filter(nft => 
+                ['rare', 'epic', 'legendary'].includes(nft.rarity)
+            ).length;
+            document.getElementById('rareCount').textContent = rareCount;
+            
+            const listedCount = myCollection.filter(nft => nft.listed).length;
+            document.getElementById('listedCount').textContent = listedCount;
+        }
+        
+        // 查看 NFT 详情
+        function viewNFT(id) {
+            window.location.href = `detail.html?id=${id}`;
+        }
+        
+        // 出售 NFT
+        function sellNFT(id) {
+            const nft = myCollection.find(n => n.id === id);
+            const price = prompt(`设置 "${nft.title}" 的出售价格 (SIL):`, nft.currentFloorPrice);
+            if (price && !isNaN(price) && price > 0) {
+                nft.listed = true;
+                nft.listPrice = parseInt(price);
+                alert(`✅ 上架成功！\n价格：${price.toLocaleString()} SIL`);
+                renderCollection();
+            }
+        }
+        
+        // 取消出售
+        function cancelListing(id) {
+            const nft = myCollection.find(n => n.id === id);
+            if (confirm(`确认取消 "${nft.title}" 的出售吗？`)) {
+                nft.listed = false;
+                delete nft.listPrice;
+                alert('✅ 已取消出售');
+                renderCollection();
+            }
+        }
+        
+        // 转移 NFT
+        function transferNFT(id) {
+            const nft = myCollection.find(n => n.id === id);
+            const address = prompt(`转移 "${nft.title}" 到地址:`, '0x...');
+            if (address && address.startsWith('0x')) {
+                alert(`✅ 转移成功！\n目标地址：${address}`);
+            } else {
+                alert('❌ 无效地址');
+            }
+        }
+        
+        // 筛选
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderCollection();
+            });
+        });
+        
+        // 搜索
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            renderCollection();
+        });
+        
+        // 初始化
+        renderCollection();
+        console.log('🎨 我的收藏已加载');
+    </script>
+</body>
+</html>

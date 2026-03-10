@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 游戏化中心 - 硅基世界</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .nav-links a.active {
+            color: #667eea;
+        }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* 用户信息卡片 */
+        .user-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .user-stat {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .user-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .user-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        /* 内容网格 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* 卡片 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 任务列表 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .task-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .task-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .task-progress {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .task-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .task-reward {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .reward-tag {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 成就网格 */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .achievement-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            opacity: 0.5;
+        }
+        
+        .achievement-item.unlocked {
+            opacity: 1;
+            background: linear-gradient(135deg, #fff9e6, #fff);
+            border: 2px solid #ffd700;
+        }
+        
+        .achievement-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .achievement-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* 排行榜 */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .rank {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .rank.gold { color: #ffd700; }
+        .rank.silver { color: #c0c0c0; }
+        .rank.bronze { color: #cd7f32; }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .username {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-points {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* 徽章展示 */
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+        
+        .badge-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .badge-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge-name {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <a href="../dashboard/index.html" class="logo">🌍 硅基世界</a>
+            <div class="nav-links">
+                <a href="../dashboard/index.html">Dashboard</a>
+                <a href="../marketplace/index.html">市场</a>
+                <a href="../developers/index.html">开发者</a>
+                <a href="gamification.html" class="active">游戏化</a>
+            </div>
+        </nav>
+        
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🎮 游戏化中心</h1>
+            <p>完成任务、解锁成就、登上排行榜！</p>
+        </div>
+        
+        <!-- 用户信息 -->
+        <div class="user-card" id="userCard">
+            <div class="user-stat">
+                <div class="user-stat-value" id="userTokens">0</div>
+                <div class="user-stat-label">💰 代币</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="userExp">0</div>
+                <div class="user-stat-label">⭐ 经验</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="userAchievements">0/0</div>
+                <div class="user-stat-label">🏆 成就</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="userBadges">0</div>
+                <div class="user-stat-label">🎖️ 徽章</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="userRank">-</div>
+                <div class="user-stat-label">📊 排名</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="loginStreak">0</div>
+                <div class="user-stat-label">🔥 连续登录</div>
+            </div>
+        </div>
+        
+        <!-- 内容网格 -->
+        <div class="content-grid">
+            <!-- 每日任务 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 每日任务</h2>
+                    <button class="btn" onclick="checkLogin()">✅ 签到</button>
+                </div>
+                <div class="task-list" id="taskList">
+                    <div style="text-align: center; color: #999; padding: 2rem;">加载中...</div>
+                </div>
+            </div>
+            
+            <!-- 成就 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🏆 成就系统</h2>
+                    <span id="achievementCount" style="color: #667eea; font-weight: 600;">0 已解锁</span>
+                </div>
+                <div class="achievement-grid" id="achievementGrid">
+                    <div style="text-align: center; color: #999; padding: 2rem; grid-column: 1/-1;">加载中...</div>
+                </div>
+            </div>
+            
+            <!-- 排行榜 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 排行榜</h2>
+                    <select id="leaderboardType" onchange="loadLeaderboard()" style="padding: 0.5rem; border-radius: 6px; border: 1px solid #ddd;">
+                        <option value="comprehensive">综合</option>
+                        <option value="wealth">财富</option>
+                        <option value="social">社交</option>
+                    </select>
+                </div>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <div style="text-align: center; color: #999; padding: 2rem;">加载中...</div>
+                </div>
+            </div>
+            
+            <!-- 徽章 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🎖️ 我的徽章</h2>
+                    <span id="badgeCount" style="color: #667eea; font-weight: 600;">0 枚</span>
+                </div>
+                <div class="badge-grid" id="badgeGrid">
+                    <div style="text-align: center; color: #999; padding: 2rem; grid-column: 1/-1;">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API 基础 URL
+        const API_BASE = 'http://localhost:8000/api/v1';
+        
+        // 模拟用户 ID (实际应用中应该从登录状态获取)
+        const USER_ID = 'user_' + Math.floor(Math.random() * 1000);
+        
+        // 成就图标映射
+        const ACHIEVEMENT_ICONS = {
+            'social': '🤝',
+            'economic': '💰',
+            'exploration': '🗺️',
+            'creation': '🎨',
+            'governance': '🗳️',
+            'special': '⭐'
+        };
+        
+        // 徽章图标映射
+        const BADGE_ICONS = {
+            'social': '👥',
+            'economic': '💎',
+            'exploration': '🧭',
+            'creation': '✏️',
+            'governance': '📜',
+            'special': '🌟',
+            'event': '🎉'
+        };
+        
+        // 加载用户数据
+        async function loadUserData() {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/profile`, {
+                    headers: { 'X-User-ID': USER_ID }
+                });
+                const data = await response.json();
+                
+                // 更新用户统计
+                document.getElementById('userTokens').textContent = data.balance?.tokens?.toLocaleString() || '0';
+                document.getElementById('userExp').textContent = data.balance?.exp?.toLocaleString() || '0';
+                document.getElementById('userAchievements').textContent = `${data.achievements?.unlocked_count || 0}/${data.achievements?.total_achievements || 0}`;
+                document.getElementById('userBadges').textContent = data.badges?.total_badges || '0';
+                document.getElementById('userRank').textContent = data.leaderboard?.rank ? `#${data.leaderboard.rank}` : '-';
+                document.getElementById('loginStreak').textContent = data.tasks?.login_streak || '0';
+                
+                document.getElementById('achievementCount').textContent = `${data.achievements?.unlocked_count || 0} 已解锁`;
+                document.getElementById('badgeCount').textContent = `${data.badges?.total_badges || 0} 枚`;
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+            }
+        }
+        
+        // 加载每日任务
+        async function loadTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/daily-tasks`, {
+                    headers: { 'X-User-ID': USER_ID }
+                });
+                const data = await response.json();
+                
+                const taskList = document.getElementById('taskList');
+                if (data.tasks && data.tasks.length > 0) {
+                    taskList.innerHTML = data.tasks.map(task => `
+                        <div class="task-item">
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-desc">${task.description}</div>
+                            <div class="task-progress">
+                                <div class="task-progress-bar" style="width: ${(task.progress / task.target * 100)}%"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="task-reward">
+                                    ${task.reward.tokens ? `<span class="reward-tag">💰 ${task.reward.tokens}</span>` : ''}
+                                    ${task.reward.exp ? `<span class="reward-tag">⭐ ${task.reward.exp}</span>` : ''}
+                                </div>
+                                ${task.is_completed && !task.is_claimed ? 
+                                    `<button class="btn" onclick="claimReward('${task.id}')">领取</button>` : 
+                                    task.is_claimed ? 
+                                    `<button class="btn" disabled>已领取</button>` :
+                                    `<button class="btn" disabled>${task.progress}/${task.target}</button>`
+                                }
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    taskList.innerHTML = '<div style="text-align: center; color: #999;">暂无任务</div>';
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                document.getElementById('taskList').innerHTML = '<div style="text-align: center; color: #f00;">加载失败</div>';
+            }
+        }
+        
+        // 加载成就
+        async function loadAchievements() {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/achievements?include_locked=true`, {
+                    headers: { 'X-User-ID': USER_ID }
+                });
+                const data = await response.json();
+                
+                const grid = document.getElementById('achievementGrid');
+                if (data.achievements && data.achievements.length > 0) {
+                    grid.innerHTML = data.achievements.slice(0, 12).map(ach => `
+                        <div class="achievement-item ${ach.is_unlocked ? 'unlocked' : ''}">
+                            <div class="achievement-icon">${ACHIEVEMENT_ICONS['social'] || '🏆'}</div>
+                            <div class="achievement-name">${ach.name}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<div style="text-align: center; color: #999; grid-column: 1/-1;">暂无成就</div>';
+                }
+            } catch (error) {
+                console.error('加载成就失败:', error);
+            }
+        }
+        
+        // 加载排行榜
+        async function loadLeaderboard() {
+            try {
+                const type = document.getElementById('leaderboardType').value;
+                const response = await fetch(`${API_BASE}/gamification/leaderboard?type=${type}&limit=10`);
+                const data = await response.json();
+                
+                const list = document.getElementById('leaderboardList');
+                if (data.ranking && data.ranking.length > 0) {
+                    list.innerHTML = data.ranking.map((entry, index) => {
+                        let rankClass = 'rank';
+                        if (entry.rank === 1) rankClass += ' gold';
+                        else if (entry.rank === 2) rankClass += ' silver';
+                        else if (entry.rank === 3) rankClass += ' bronze';
+                        
+                        return `
+                            <div class="leaderboard-item">
+                                <div class="${rankClass}">${entry.rank}</div>
+                                <div class="user-info">
+                                    <div class="username">${entry.user_id}</div>
+                                    <div class="user-points">${entry.points.toLocaleString()} 分</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<div style="text-align: center; color: #999;">暂无数据</div>';
+                }
+            } catch (error) {
+                console.error('加载排行榜失败:', error);
+            }
+        }
+        
+        // 加载徽章
+        async function loadBadges() {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/badges`, {
+                    headers: { 'X-User-ID': USER_ID }
+                });
+                const data = await response.json();
+                
+                const grid = document.getElementById('badgeGrid');
+                if (data.badges && data.badges.length > 0) {
+                    grid.innerHTML = data.badges.map(badge => `
+                        <div class="badge-item">
+                            <div class="badge-icon">${BADGE_ICONS['social'] || '🎖️'}</div>
+                            <div class="badge-name">${badge.id}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<div style="text-align: center; color: #999; grid-column: 1/-1;">暂无徽章</div>';
+                }
+            } catch (error) {
+                console.error('加载徽章失败:', error);
+            }
+        }
+        
+        // 签到
+        async function checkLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/daily-tasks/login`, {
+                    method: 'POST',
+                    headers: { 'X-User-ID': USER_ID }
+                });
+                const data = await response.json();
+                alert(`✅ 签到成功！\n连续登录：${data.streak} 天${data.bonus ? '\n🎁 获得奖励：' + JSON.stringify(data.bonus) : ''}`);
+                loadUserData();
+                loadTasks();
+            } catch (error) {
+                alert('签到失败：' + error.message);
+            }
+        }
+        
+        // 领取奖励
+        async function claimReward(taskId) {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/daily-tasks/claim`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-User-ID': USER_ID,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ task_id: taskId })
+                });
+                const data = await response.json();
+                alert(`🎁 领取成功！\n奖励：${JSON.stringify(data.reward)}`);
+                loadUserData();
+                loadTasks();
+            } catch (error) {
+                alert('领取失败：' + error.message);
+            }
+        }
+        
+        // 模拟行为更新 (用于测试)
+        async function simulateAction(action, value) {
+            try {
+                const response = await fetch(`${API_BASE}/gamification/achievements/update`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-User-ID': USER_ID,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action, value })
+                });
+                const data = await response.json();
+                if (data.newly_unlocked && data.newly_unlocked.length > 0) {
+                    alert(`🏆 解锁成就：${data.newly_unlocked.map(a => a.name).join(', ')}`);
+                }
+                loadUserData();
+                loadTasks();
+                loadAchievements();
+            } catch (error) {
+                console.error('更新失败:', error);
+            }
+        }
+        
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            loadTasks();
+            loadAchievements();
+            loadLeaderboard();
+            loadBadges();
+            
+            // 添加测试按钮
+            const testDiv = document.createElement('div');
+            testDiv.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);';
+            testDiv.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">🧪 测试操作</div>
+                <button class="btn" onclick="simulateAction('add_friend', 1)" style="margin: 0.25rem;">加好友</button>
+                <button class="btn" onclick="simulateAction('trade', 1)" style="margin: 0.25rem;">交易</button>
+                <button class="btn" onclick="simulateAction('explore', 1)" style="margin: 0.25rem;">探索</button>
+            `;
+            document.body.appendChild(testDiv);
+        });
+    </script>
+</body>
+</html>

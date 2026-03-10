@@ -1,0 +1,14 @@
+# 忽略敏感文件
+.env
+.env.local
+*.log
+
+# 忽略编译产物
+artifacts/
+cache/
+
+# 忽略 node_modules
+node_modules/
+
+# 忽略部署信息 (可选)
+deployment-info.json

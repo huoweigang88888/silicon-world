@@ -25,6 +25,9 @@ from src.api.routes.a2a import router as a2a_router
 from src.api.routes.nexus_wallet import router as nexus_wallet_router
 from src.api.routes.performance import router as performance_router
 from src.api.routes.collab_tasks import router as collab_tasks_router
+from src.api.routes.gamification import router as gamification_router
+from src.api.routes.optimization import router as optimization_router
+from src.api.routes.nexusa import router as nexusa_router
 from src.core.database import init_db
 
 
@@ -94,6 +97,9 @@ app.include_router(a2a_router)
 app.include_router(nexus_wallet_router)
 app.include_router(performance_router)
 app.include_router(collab_tasks_router)
+app.include_router(gamification_router)
+app.include_router(optimization_router)
+app.include_router(nexusa_router)
 
 
 # 数据模型

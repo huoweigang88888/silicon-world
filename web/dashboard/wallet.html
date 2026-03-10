@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💼 我的钱包 - 硅基世界</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #667eea; }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #667eea;
+        }
+        
+        .network-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        
+        /* 钱包卡片 */
+        .wallet-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 2.5rem;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+        
+        .wallet-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .wallet-address {
+            font-size: 1.5rem;
+            font-family: monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .wallet-address:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .wallet-balance {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 统计网格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* 交易历史 */
+        .transactions {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .transactions-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .tx-info {
+            flex: 1;
+        }
+        
+        .tx-type {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tx-hash {
+            font-size: 0.85rem;
+            color: #999;
+            font-family: monospace;
+        }
+        
+        .tx-amount {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .tx-amount.in { color: #10b981; }
+        .tx-amount.out { color: #ef4444; }
+        
+        .tx-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 1rem; text-align: center; }
+            .wallet-balance { font-size: 2rem; }
+            .transaction-item { flex-direction: column; gap: 1rem; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <a href="index.html" class="logo">🌍 硅基世界</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="../marketplace/index.html">市场</a>
+                <a href="gamification.html">游戏化</a>
+                <a href="wallet.html" class="active">钱包</a>
+            </div>
+        </nav>
+        
+        <!-- 头部 -->
+        <div class="header">
+            <div>
+                <h1>💼 我的钱包</h1>
+                <p style="color: #666; margin-top: 0.5rem;">管理您的数字资产和交易</p>
+            </div>
+            <div class="network-badge" id="networkBadge">⛓️ Goerli Testnet</div>
+        </div>
+        
+        <!-- 钱包卡片 -->
+        <div class="wallet-card" id="walletCard" style="display: none;">
+            <div class="wallet-label">我的钱包地址</div>
+            <div class="wallet-address" id="walletAddress" onclick="copyAddress()" title="点击复制">
+                0x0000...0000
+            </div>
+            <div class="wallet-balance" id="walletBalance">0.00</div>
+            <div class="balance-label">ETH</div>
+        </div>
+        
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState">
+            <div style="font-size: 5rem; margin-bottom: 1.5rem;">👛</div>
+            <h2 style="color: #333; margin-bottom: 0.75rem;">还没有钱包</h2>
+            <p style="margin-bottom: 2rem;">创建一个钱包或导入现有钱包开始使用</p>
+            <div class="action-buttons" style="max-width: 400px; margin: 0 auto;">
+                <button class="btn btn-primary" onclick="showCreateModal()" style="color: #667eea;">
+                    <span>✨</span> 创建钱包
+                </button>
+                <button class="btn btn-secondary" onclick="showImportModal()" style="background: #667eea; color: white;">
+                    <span>📥</span> 导入钱包
+                </button>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 (有钱包时显示) -->
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button class="btn btn-primary" onclick="showSendModal()" style="color: #667eea;">
+                <span>📤</span> 发送
+            </button>
+            <button class="btn btn-secondary" onclick="showReceiveModal()">
+                <span>📥</span> 接收
+            </button>
+            <button class="btn btn-secondary" onclick="refreshBalance()">
+                <span>🔄</span> 刷新
+            </button>
+            <button class="btn btn-secondary" onclick="exportWallet()" style="background: #fef3c7; color: #92400e;">
+                <span>💾</span> 导出
+            </button>
+        </div>
+        
+        <!-- 统计 -->
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSent">0</div>
+                <div class="stat-label">发送总额 (ETH)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalReceived">0</div>
+                <div class="stat-label">接收总额 (ETH)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="txCount">0</div>
+                <div class="stat-label">交易次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nftCount">0</div>
+                <div class="stat-label">持有 NFT</div>
+            </div>
+        </div>
+        
+        <!-- 交易历史 -->
+        <div class="transactions" id="transactions" style="display: none;">
+            <h2 class="transactions-title">📜 交易历史</h2>
+            <div class="transaction-list" id="txList">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 创建钱包模态框 -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2 class="modal-title">✨ 创建新钱包</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                创建一个新的以太坊钱包地址。请安全保存您的私钥！
+            </p>
+            <div class="form-group">
+                <label class="form-label">钱包名称 (可选)</label>
+                <input type="text" class="form-input" id="createLabel" placeholder="我的钱包">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('createModal')" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="createWallet()" style="background: #667eea; color: white;">创建钱包</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 导入钱包模态框 -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h2 class="modal-title">📥 导入钱包</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                使用私钥导入现有钱包
+            </p>
+            <div class="form-group">
+                <label class="form-label">私钥</label>
+                <input type="password" class="form-input" id="importPrivateKey" placeholder="0x...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">钱包名称 (可选)</label>
+                <input type="text" class="form-input" id="importLabel" placeholder="导入的钱包">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('importModal')" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="importWallet()" style="background: #667eea; color: white;">导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 接收模态框 -->
+    <div class="modal" id="receiveModal">
+        <div class="modal-content">
+            <h2 class="modal-title">📥 接收资产</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                分享您的地址以接收 ETH 或其他代币
+            </p>
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 12px; margin-bottom: 1.5rem;">
+                <div style="font-size: 4rem;">📱</div>
+                <div class="wallet-address" id="receiveAddress" style="margin: 1rem 0; font-size: 1rem;">0x...</div>
+                <button class="btn btn-primary" onclick="copyAddress()" style="background: #667eea; color: white; margin: 0 auto;">
+                    📋 复制地址
+                </button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('receiveModal')" style="background: #e0e0e0; color: #333;">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API 基础 URL
+        const API_BASE = 'http://localhost:8000/api/v1/nexusa';
+        
+        // 当前钱包
+        let currentWallet = null;
+        
+        // 模拟交易数据
+        const mockTransactions = [
+            { id: 1, type: '接收', from: '0x1234...5678', amount: '+0.5', status: 'completed', hash: '0xabc...', time: '2026-03-10 04:30' },
+            { id: 2, type: '发送', to: '0x9876...5432', amount: '-0.2', status: 'completed', hash: '0xdef...', time: '2026-03-09 15:20' },
+            { id: 3, type: '购买 NFT', to: 'NFT Market', amount: '-0.1', status: 'pending', hash: '0x123...', time: '2026-03-09 10:00' },
+        ];
+        
+        // 检查是否有钱包
+        function checkWallet() {
+            const saved = localStorage.getItem('silicon_wallet');
+            if (saved) {
+                currentWallet = JSON.parse(saved);
+                showWallet();
+            }
+        }
+        
+        // 显示钱包
+        function showWallet() {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('walletCard').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'grid';
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('transactions').style.display = 'block';
+            
+            document.getElementById('walletAddress').textContent = currentWallet.address;
+            document.getElementById('receiveAddress').textContent = currentWallet.address;
+            
+            // 加载统计
+            loadStatistics();
+            loadTransactions();
+        }
+        
+        // 创建钱包
+        async function createWallet() {
+            const label = document.getElementById('createLabel').value || '我的钱包';
+            
+            try {
+                const response = await fetch(`${API_BASE}/wallet/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ label })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentWallet = data.wallet;
+                    localStorage.setItem('silicon_wallet', JSON.stringify(currentWallet));
+                    
+                    alert(`✅ 钱包创建成功！\n\n地址：${currentWallet.address}\n\n⚠️ 请安全保存您的私钥！`);
+                    closeModal('createModal');
+                    showWallet();
+                }
+            } catch (error) {
+                alert('创建失败：' + error.message);
+            }
+        }
+        
+        // 导入钱包
+        async function importWallet() {
+            const privateKey = document.getElementById('importPrivateKey').value;
+            const label = document.getElementById('importLabel').value || '导入的钱包';
+            
+            if (!privateKey || !privateKey.startsWith('0x')) {
+                alert('❌ 请输入有效的私钥 (0x 开头)');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/wallet/import`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ private_key: privateKey, label })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentWallet = data.wallet;
+                    localStorage.setItem('silicon_wallet', JSON.stringify(currentWallet));
+                    
+                    alert(`✅ 钱包导入成功！\n地址：${currentWallet.address}`);
+                    closeModal('importModal');
+                    document.getElementById('importPrivateKey').value = '';
+                    showWallet();
+                }
+            } catch (error) {
+                alert('导入失败：' + error.message);
+            }
+        }
+        
+        // 加载统计
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_BASE}/wallet/${currentWallet.address}/statistics`);
+                const data = await response.json();
+                
+                document.getElementById('totalSent').textContent = parseFloat(data.total_sent || 0).toFixed(4);
+                document.getElementById('totalReceived').textContent = parseFloat(data.total_received || 0).toFixed(4);
+                document.getElementById('txCount').textContent = data.total_payments || 0;
+                document.getElementById('nftCount').textContent = Math.floor(Math.random() * 10); // 模拟
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+        
+        // 加载交易
+        function loadTransactions() {
+            const txList = document.getElementById('txList');
+            if (mockTransactions.length === 0) {
+                txList.innerHTML = '<div class="empty-state">暂无交易记录</div>';
+                return;
+            }
+            
+            txList.innerHTML = mockTransactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="tx-info">
+                        <div class="tx-type">${tx.type}</div>
+                        <div class="tx-hash">${tx.hash} • ${tx.time}</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="tx-amount ${tx.amount.startsWith('+') ? 'in' : 'out'}">${tx.amount} ETH</div>
+                        <span class="tx-status status-${tx.status}">${tx.status === 'completed' ? '✅' : tx.status === 'pending' ? '⏳' : '❌'} ${tx.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 复制地址
+        function copyAddress() {
+            navigator.clipboard.writeText(currentWallet.address);
+            alert('📋 地址已复制到剪贴板！');
+        }
+        
+        // 刷新余额
+        function refreshBalance() {
+            document.getElementById('walletBalance').textContent = (Math.random() * 2).toFixed(4);
+            alert('🔄 余额已刷新');
+        }
+        
+        // 导出钱包
+        function exportWallet() {
+            const password = prompt('请输入密码加密私钥:');
+            if (password) {
+                alert('💾 导出功能开发中...\n\n实际应用中会下载加密的 keystore 文件');
+            }
+        }
+        
+        // 模态框
+        function showCreateModal() { document.getElementById('createModal').classList.add('show'); }
+        function showImportModal() { document.getElementById('importModal').classList.add('show'); }
+        function showReceiveModal() { document.getElementById('receiveModal').classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        
+        // 初始化
+        checkWallet();
+    </script>
+</body>
+</html>

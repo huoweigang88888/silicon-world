@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铸造 NFT - 硅基世界</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo { font-size: 1.5rem; font-weight: bold; color: #667eea; text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 500; }
+        .nav-links a:hover { color: #667eea; }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 { font-size: 2rem; color: #667eea; margin-bottom: 0.5rem; }
+        .header p { color: #666; }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .form-section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 1rem; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 500; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-textarea { min-height: 120px; resize: vertical; }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        .upload-area:hover { background: #f0f0f0; }
+        .upload-icon { font-size: 4rem; margin-bottom: 1rem; }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 100%;
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+        .status-box.show { display: block; }
+        .status-success { border-left: 4px solid #10b981; }
+        .status-error { border-left: 4px solid #ef4444; }
+        .status-pending { border-left: 4px solid #f59e0b; }
+        
+        .status-title { font-weight: 600; margin-bottom: 0.5rem; }
+        .status-message { color: #666; font-size: 0.9rem; }
+        
+        .network-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <a href="../dashboard/index.html" class="logo">🌍 硅基世界</a>
+            <div class="nav-links">
+                <a href="index.html">市场</a>
+                <a href="collection.html">我的 NFT</a>
+                <a href="mint.html" class="active">铸造</a>
+            </div>
+            <div class="network-info" id="networkInfo">⛓️ 连接中...</div>
+        </nav>
+        
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🎨 铸造 NFT</h1>
+            <p>将你的数字作品铸造为链上 NFT</p>
+        </div>
+        
+        <!-- 表单 -->
+        <div class="form-card">
+            <form id="mintForm">
+                <!-- NFT 类型 -->
+                <div class="form-section">
+                    <h3 class="section-title">📝 NFT 信息</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">NFT 类型 *</label>
+                        <select class="form-select" id="nftType" required>
+                            <option value="">选择类型</option>
+                            <option value="land">🏠 土地</option>
+                            <option value="building">🏢 建筑</option>
+                            <option value="item">🎒 物品</option>
+                            <option value="artwork">🎨 艺术品</option>
+                            <option value="identity">🎭 身份</option>
+                            <option value="music">🎵 音乐</option>
+                            <option value="collectible">⭐ 收藏品</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">NFT 名称 *</label>
+                        <input type="text" class="form-input" id="nftName" placeholder="例如：中心城地块 #001" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">描述 *</label>
+                        <textarea class="form-textarea" id="nftDescription" placeholder="描述你的 NFT..." required></textarea>
+                    </div>
+                </div>
+                
+                <!-- 上传文件 -->
+                <div class="form-section">
+                    <h3 class="section-title">📁 上传作品</h3>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📤</div>
+                        <div style="font-weight: 600;">点击或拖拽文件到此处</div>
+                        <div style="color: #999; font-size: 0.9rem; margin-top: 0.5rem;">支持 JPG, PNG, GIF (最大 10MB)</div>
+                        <input type="file" id="fileInput" style="display: none;" accept="image/*">
+                    </div>
+                    
+                    <div id="uploadPreview" style="margin-top: 1.5rem; display: none;">
+                        <img id="previewImage" style="max-width: 300px; border-radius: 8px;">
+                    </div>
+                </div>
+                
+                <!-- 提交 -->
+                <div class="form-section">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>✨</span> 铸造 NFT
+                    </button>
+                    <div style="text-align: center; color: #999; font-size: 0.9rem; margin-top: 1rem;">
+                        ⚠️ 铸造需要支付 Gas 费用
+                    </div>
+                </div>
+            </form>
+            
+            <!-- 状态显示 -->
+            <div class="status-box" id="statusBox">
+                <div class="status-title" id="statusTitle"></div>
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 加载 ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <script src="../js/wallet.js"></script>
+    <script src="../js/contracts.js"></script>
+    
+    <script>
+        // 全局变量
+        let wallet = null;
+        let contractManager = null;
+        
+        // 合约地址 (部署后更新)
+        const CONTRACT_ADDRESSES = {
+            goerli: {
+                nft: '0x...', // 部署后更新
+                marketplace: '0x...'
+            }
+        };
+        
+        // 初始化
+        async function init() {
+            try {
+                // 创建钱包实例
+                wallet = new window.SiliconWallet();
+                
+                // 初始化合约管理器
+                contractManager = new window.ContractManager();
+                
+                // 连接 Goerli 测试网
+                const rpcUrl = 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'; // 公共 RPC
+                await contractManager.init(rpcUrl, wallet);
+                
+                // 设置合约地址 (暂时使用占位符)
+                contractManager.setContractAddresses(
+                    '0x0000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000'
+                );
+                
+                // 加载合约
+                await contractManager.loadNFTContract();
+                await contractManager.loadMarketplaceContract();
+                
+                // 更新网络信息
+                const network = await contractManager.getNetwork();
+                document.getElementById('networkInfo').textContent = 
+                    `⛓️ ${network.name === 'goerli' ? 'Goerli 测试网' : '未知网络'} (ID: ${network.chainId})`;
+                
+                console.log('✅ 初始化成功');
+            } catch (error) {
+                console.error('❌ 初始化失败:', error);
+                showStatus('error', '初始化失败：' + error.message);
+            }
+        }
+        
+        // 文件上传
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                previewFile(file);
+            }
+        });
+        
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('uploadPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 表单提交
+        document.getElementById('mintForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span><span>铸造中...</span>';
+            
+            try {
+                // 1. 解锁钱包
+                const password = prompt('请输入钱包密码解锁:');
+                if (!password) {
+                    throw new Error('需要解锁钱包');
+                }
+                
+                showStatus('pending', '🔓 解锁钱包中...');
+                await wallet.unlockWallet(password);
+                
+                // 2. 准备元数据
+                const nftType = document.getElementById('nftType').value;
+                const nftName = document.getElementById('nftName').value;
+                const nftDescription = document.getElementById('nftDescription').value;
+                
+                // 创建 IPFS 风格的 URI (实际应上传到 IPFS)
+                const metadata = {
+                    name: nftName,
+                    description: nftDescription,
+                    type: nftType,
+                    attributes: []
+                };
+                
+                const tokenURI = 'ipfs://' + btoa(JSON.stringify(metadata));
+                
+                // 3. 铸造 NFT
+                showStatus('pending', '🔨 正在铸造 NFT...');
+                const result = await contractManager.mintNFT(tokenURI, nftType);
+                
+                // 4. 显示成功
+                showStatus('success', 
+                    `✅ NFT 铸造成功!<br>
+                     Token ID: ${result.tokenId}<br>
+                     交易哈希：<a href="https://goerli.etherscan.io/tx/${result.txHash}" target="_blank">${result.txHash}</a>`
+                );
+                
+                // 5. 重置表单
+                document.getElementById('mintForm').reset();
+                document.getElementById('uploadPreview').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ 铸造失败:', error);
+                showStatus('error', '❌ 铸造失败：' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨</span><span>铸造 NFT</span>';
+            }
+        });
+        
+        // 显示状态
+        function showStatus(type, message) {
+            const statusBox = document.getElementById('statusBox');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            statusBox.className = 'status-box show status-' + type;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                pending: '⏳'
+            };
+            
+            statusTitle.textContent = icons[type] + ' ' + 
+                (type === 'success' ? '成功' : type === 'error' ? '失败' : '处理中');
+            statusMessage.innerHTML = message;
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
