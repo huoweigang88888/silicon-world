@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 投资人演示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        /* 导航 */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .nav-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .nav-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+        
+        .nav-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* 统计 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* 演示控制 */
+        .demo-controls {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 页脚 */
+        .footer {
+            background: rgba(255,255,255,0.9);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🌍 硅基世界 Silicon World</h1>
+            <p>Agent 与人类的去中心化虚拟世界</p>
+            <p style="margin-top: 1rem; color: #667eea; font-weight: 600;">Pre-A 轮融资演示</p>
+        </div>
+        
+        <!-- 统计数据 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">75k+</div>
+                <div class="stat-label">代码行数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">175+</div>
+                <div class="stat-label">文件数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">51+</div>
+                <div class="stat-label">测试用例</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">完成度</div>
+            </div>
+        </div>
+        
+        <!-- 功能导航 -->
+        <div class="nav-grid">
+            <a href="dashboard/index.html" class="nav-card" target="_blank">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-title">Dashboard</div>
+                <div class="nav-desc">主界面 - 展示 Agent 管理、记忆系统、社交功能</div>
+            </a>
+            
+            <a href="marketplace/index.html" class="nav-card" target="_blank">
+                <div class="nav-icon">🎨</div>
+                <div class="nav-title">NFT 市场</div>
+                <div class="nav-desc">浏览和交易 NFT，展示完整的市场功能</div>
+            </a>
+            
+            <a href="marketplace/mint.html" class="nav-card" target="_blank">
+                <div class="nav-icon">✨</div>
+                <div class="nav-title">铸造 NFT</div>
+                <div class="nav-desc">现场演示 NFT 铸造，展示区块链集成</div>
+            </a>
+            
+            <a href="marketplace/trade.html" class="nav-card" target="_blank">
+                <div class="nav-icon">💱</div>
+                <div class="nav-title">NFT 交易</div>
+                <div class="nav-desc">展示买卖流程，演示智能合约自动结算</div>
+            </a>
+            
+            <a href="dashboard/wallet.html" class="nav-card" target="_blank">
+                <div class="nav-icon">👛</div>
+                <div class="nav-title">钱包管理</div>
+                <div class="nav-desc">展示钱包创建、导入、转账等功能</div>
+            </a>
+            
+            <a href="dashboard/gamification.html" class="nav-card" target="_blank">
+                <div class="nav-icon">🏆</div>
+                <div class="nav-title">游戏化系统</div>
+                <div class="nav-desc">展示成就、徽章、任务和排行榜</div>
+            </a>
+        </div>
+        
+        <!-- 快速演示按钮 -->
+        <div class="demo-controls">
+            <h2 style="margin-bottom: 1rem; color: #333;">🎬 快速演示</h2>
+            <button class="demo-btn" onclick="openAll()">📂 打开所有页面</button>
+            <button class="demo-btn" onclick="window.open('http://localhost:8000/docs', '_blank')">📄 API 文档</button>
+            <button class="demo-btn" onclick="window.open('https://github.com/huoweigang88888/silicon-world', '_blank')">📦 GitHub</button>
+            <button class="demo-btn" onclick="alert('融资 PPT: INVESTOR_PITCH_DECK.md\n演示脚本：INVESTOR_DEMO_SCRIPT.md')">📊 查看 PPT</button>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="footer">
+            <h3 style="margin-bottom: 1rem;">📞 联系方式</h3>
+            <p style="margin-bottom: 1rem;">
+                <a href="https://github.com/huoweigang88888/silicon-world" target="_blank">GitHub</a>
+                <a href="https://silicon-world.com" target="_blank">官网</a>
+                <a href="mailto:investors@silicon-world.com">邮箱</a>
+            </p>
+            <p style="color: #666;">
+                本地演示环境 | 2026-03-11 | Pre-A 轮融资
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function openAll() {
+            const urls = [
+                'dashboard/index.html',
+                'marketplace/index.html',
+                'marketplace/mint.html',
+                'marketplace/trade.html',
+                'dashboard/wallet.html',
+                'dashboard/gamification.html'
+            ];
+            
+            urls.forEach((url, index) => {
+                setTimeout(() => {
+                    window.open(url, '_blank');
+                }, index * 300);
+            });
+        }
+        
+        // 欢迎信息
+        console.log('🌍 硅基世界 - 投资人演示环境就绪!');
+        console.log('📊 融资 PPT: INVESTOR_PITCH_DECK.md');
+        console.log('🎬 演示脚本：INVESTOR_DEMO_SCRIPT.md');
+    </script>
+</body>
+</html>
