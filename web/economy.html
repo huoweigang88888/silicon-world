@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 经济系统</title>
+    <meta name="description" content="管理钱包、代币、资产">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f0f23;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 - 与 world.html 保持一致 */
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        /* 主容器 */
+        .container {
+            margin-top: 70px;
+            padding: 40px 30px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: 40px;
+        }
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .page-subtitle {
+            color: #a0aec0;
+            font-size: 16px;
+        }
+        
+        /* 资产总览卡片 */
+        .assets-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .asset-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .asset-label {
+            font-size: 14px;
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+        .asset-value {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .asset-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .asset-change.positive { color: #48bb78; }
+        .asset-change.negative { color: #f56565; }
+        
+        /* 功能网格 */
+        .functions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .function-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s;
+        }
+        .function-card:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .function-icon {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .function-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .function-desc {
+            color: #a0aec0;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #a0aec0;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 交易记录 */
+        .transactions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .transaction-details {
+            flex: 1;
+        }
+        .transaction-type {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .transaction-time {
+            font-size: 13px;
+            color: #a0aec0;
+        }
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .transaction-amount.positive { color: #48bb78; }
+        .transaction-amount.negative { color: #f56565; }
+        
+        /* 钱包连接状态 */
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .wallet-address {
+            font-family: monospace;
+            font-size: 14px;
+            color: #a0aec0;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .nav-links { gap: 15px; font-size: 14px; }
+            .container { padding: 20px 15px; }
+            .assets-overview { grid-template-columns: 1fr; }
+            .functions-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="world.html" class="logo">🌍 硅基世界</a>
+            <ul class="nav-links">
+                <li><a href="world.html">主世界</a></li>
+                <li><a href="app.html">社交</a></li>
+                <li><a href="marketplace/marketplace.html">NFT 市场</a></li>
+                <li><a href="economy.html" class="active">经济</a></li>
+                <li><a href="gamification.html">成就</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">三</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">💰 经济系统</h1>
+            <p class="page-subtitle">管理你的数字资产和钱包</p>
+        </div>
+
+        <!-- 钱包状态 -->
+        <div class="wallet-status">
+            <div class="status-dot"></div>
+            <span>钱包已连接</span>
+            <span class="wallet-address">0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb</span>
+        </div>
+
+        <!-- 资产总览 -->
+        <div class="assets-overview">
+            <div class="asset-card">
+                <div class="asset-label">💎 SWC 代币余额</div>
+                <div class="asset-value">1,234.56</div>
+                <div class="asset-change positive">↑ +5.2% 本周</div>
+            </div>
+            <div class="asset-card">
+                <div class="asset-label">🏆 声誉积分</div>
+                <div class="asset-value">8,920</div>
+                <div class="asset-change positive">↑ +120 今日</div>
+            </div>
+            <div class="asset-card">
+                <div class="asset-label">🎨 NFT 藏品</div>
+                <div class="asset-value">12</div>
+                <div class="asset-change">总价值：3.45 ETH</div>
+            </div>
+        </div>
+
+        <!-- 功能网格 -->
+        <div class="functions-grid">
+            <!-- 发送代币 -->
+            <div class="function-card">
+                <div class="function-icon">📤</div>
+                <h3 class="function-title">发送代币</h3>
+                <p class="function-desc">向其他用户或地址转账 SWC 代币</p>
+                <div class="form-group">
+                    <label class="form-label">接收地址</label>
+                    <input type="text" class="form-input" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">金额</label>
+                    <input type="number" class="form-input" placeholder="0.00">
+                </div>
+                <button class="btn btn-primary" onclick="sendToken()">发送</button>
+            </div>
+
+            <!-- 领取奖励 -->
+            <div class="function-card">
+                <div class="function-icon">🎁</div>
+                <h3 class="function-title">领取奖励</h3>
+                <p class="function-desc">领取每日签到、任务完成奖励</p>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>每日签到</span>
+                        <span style="color: #48bb78;">+10 SWC</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>任务奖励</span>
+                        <span style="color: #48bb78;">+50 SWC</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>声誉 bonus</span>
+                        <span style="color: #48bb78;">+25 SWC</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="claimRewards()">一键领取 (85 SWC)</button>
+            </div>
+
+            <!-- 质押赚币 -->
+            <div class="function-card">
+                <div class="function-icon">📈</div>
+                <h3 class="function-title">质押赚币</h3>
+                <p class="function-desc">质押 SWC 代币获取年化收益</p>
+                <div class="form-group">
+                    <label class="form-label">质押金额</label>
+                    <input type="number" class="form-input" placeholder="0.00">
+                </div>
+                <div style="background: rgba(72, 187, 120, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>当前 APY</span>
+                        <span style="color: #48bb78; font-weight: 600;">12.5%</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="stakeTokens()">开始质押</button>
+            </div>
+
+            <!-- 兑换代币 -->
+            <div class="function-card">
+                <div class="function-icon">🔄</div>
+                <h3 class="function-title">代币兑换</h3>
+                <p class="function-desc">SWC ↔ ETH / USDT 兑换</p>
+                <div class="form-group">
+                    <label class="form-label">从</label>
+                    <input type="number" class="form-input" placeholder="0.00 SWC">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">到</label>
+                    <input type="text" class="form-input" placeholder="0.00 ETH" readonly>
+                </div>
+                <button class="btn btn-primary" onclick="swapTokens()">兑换</button>
+            </div>
+        </div>
+
+        <!-- 交易记录 -->
+        <div class="transactions">
+            <div class="section-header">
+                <h2 class="section-title">📜 最近交易记录</h2>
+                <button class="btn btn-primary" style="width: auto; padding: 8px 20px; font-size: 14px;">查看全部</button>
+            </div>
+            <div class="transaction-list">
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon">🎁</div>
+                        <div class="transaction-details">
+                            <div class="transaction-type">每日签到奖励</div>
+                            <div class="transaction-time">2 分钟前</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount positive">+10 SWC</div>
+                </div>
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon">🎨</div>
+                        <div class="transaction-details">
+                            <div class="transaction-type">NFT 购买 - "数字艺术 #042"</div>
+                            <div class="transaction-time">2 小时前</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount negative">-0.5 ETH</div>
+                </div>
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon">📤</div>
+                        <div class="transaction-details">
+                            <div class="transaction-type">转账给 0x3f...8a2c</div>
+                            <div class="transaction-time">昨天 14:32</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount negative">-50 SWC</div>
+                </div>
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon">🏆</div>
+                        <div class="transaction-details">
+                            <div class="transaction-type">任务完成奖励</div>
+                            <div class="transaction-time">昨天 10:15</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount positive">+50 SWC</div>
+                </div>
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon">📈</div>
+                        <div class="transaction-details">
+                            <div class="transaction-type">质押收益</div>
+                            <div class="transaction-time">3 天前</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount positive">+25 SWC</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 发送代币
+        function sendToken() {
+            showNotification('发送功能即将上线，敬请期待！');
+        }
+
+        // 领取奖励
+        function claimRewards() {
+            showNotification('✅ 已领取 85 SWC 奖励！');
+        }
+
+        // 质押代币
+        function stakeTokens() {
+            showNotification('质押功能即将上线，敬请期待！');
+        }
+
+        // 兑换代币
+        function swapTokens() {
+            showNotification('兑换功能即将上线，敬请期待！');
+        }
+
+        // 通知函数
+        function showNotification(message) {
+            alert(message);
+        }
+
+        // 页面加载完成
+        console.log('💰 硅基世界 - 经济系统已加载');
+    </script>
+</body>
+</html>

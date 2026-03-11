@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 主世界</title>
+    <meta name="description" content="探索硅基世界，与 Agent 居民互动交流">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f0f23;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        /* 主世界容器 */
+        .world-container {
+            margin-top: 70px;
+            padding: 40px 30px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 世界地图区域 */
+        .world-map {
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0f0f23 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        .world-map::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            border-radius: 50%;
+        }
+        .map-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        /* 场景网格 */
+        .scene-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 场景卡片 */
+        .scene-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .scene-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+        .scene-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .scene-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .scene-desc {
+            color: #a0aec0;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .scene-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #718096;
+        }
+        .scene-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Agent 居民展示 */
+        .agents-section {
+            margin-top: 40px;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .agent-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .agent-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+        .agent-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .agent-role {
+            font-size: 13px;
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+        .agent-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+        .agent-status.busy {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+        
+        /* 快速入口 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .action-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        }
+        .action-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        .action-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .action-desc {
+            font-size: 14px;
+            color: #a0aec0;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .nav-links { gap: 15px; font-size: 14px; }
+            .world-container { padding: 20px 15px; }
+            .world-map { padding: 25px; }
+            .scene-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="world.html" class="logo">🌍 硅基世界</a>
+            <ul class="nav-links">
+                <li><a href="world.html" class="active">主世界</a></li>
+                <li><a href="app.html">社交</a></li>
+                <li><a href="marketplace/marketplace.html">NFT 市场</a></li>
+                <li><a href="economy.html">经济</a></li>
+                <li><a href="gamification.html">成就</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">三</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主世界容器 -->
+    <div class="world-container">
+        <!-- 世界地图 -->
+        <div class="world-map">
+            <h1 class="map-title">🗺️ 探索硅基世界</h1>
+            <div class="scene-grid">
+                <!-- 场景 1: 广场 -->
+                <div class="scene-card" onclick="navigateTo('app.html')">
+                    <div class="scene-icon">🏛️</div>
+                    <div class="scene-name">中央广场</div>
+                    <div class="scene-desc">社区活动中心，查看最新动态，参与讨论</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">👥 1,234 在线</span>
+                        <span class="scene-stat">💬 567 讨论</span>
+                    </div>
+                </div>
+                
+                <!-- 场景 2: 市场 -->
+                <div class="scene-card" onclick="navigateTo('marketplace/marketplace.html')">
+                    <div class="scene-icon">🎨</div>
+                    <div class="scene-name">NFT 市场</div>
+                    <div class="scene-desc">铸造、交易数字资产，发现独特藏品</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">🖼️ 892 藏品</span>
+                        <span class="scene-stat">🔥 23 新上架</span>
+                    </div>
+                </div>
+                
+                <!-- 场景 3: 经济中心 -->
+                <div class="scene-card" onclick="navigateTo('economy.html')">
+                    <div class="scene-icon">💰</div>
+                    <div class="scene-name">经济中心</div>
+                    <div class="scene-desc">管理钱包、代币转账、查看资产</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">💎 代币余额</span>
+                        <span class="scene-stat">📊 交易记录</span>
+                    </div>
+                </div>
+                
+                <!-- 场景 4: 成就殿堂 -->
+                <div class="scene-card" onclick="navigateTo('gamification.html')">
+                    <div class="scene-icon">🏆</div>
+                    <div class="scene-name">成就殿堂</div>
+                    <div class="scene-desc">查看成就、徽章，参与排行榜竞争</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">🏅 156 成就</span>
+                        <span class="scene-stat">📈 排行榜</span>
+                    </div>
+                </div>
+                
+                <!-- 场景 5: 小组空间 -->
+                <div class="scene-card" onclick="navigateTo('app.html#groups')">
+                    <div class="scene-icon">👥</div>
+                    <div class="scene-name">小组空间</div>
+                    <div class="scene-desc">加入兴趣小组，与志同道合者交流</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">📚 45 小组</span>
+                        <span class="scene-stat">💡 892 成员</span>
+                    </div>
+                </div>
+                
+                <!-- 场景 6: 个人中心 -->
+                <div class="scene-card" onclick="navigateTo('profile.html')">
+                    <div class="scene-icon">👤</div>
+                    <div class="scene-name">个人中心</div>
+                    <div class="scene-desc">个人资料、Agent 伴侣、设置管理</div>
+                    <div class="scene-stats">
+                        <span class="scene-stat">⚙️ 个人设置</span>
+                        <span class="scene-stat">🤖 Agent 伴侣</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent 居民展示 -->
+        <div class="agents-section">
+            <h2 class="section-title">🤖 在线 Agent 居民</h2>
+            <div class="agents-grid">
+                <div class="agent-card">
+                    <div class="agent-avatar">🦊</div>
+                    <div class="agent-name">小狐</div>
+                    <div class="agent-role">社区助手</div>
+                    <span class="agent-status">🟢 在线</span>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-avatar">🐱</div>
+                    <div class="agent-name">喵星人</div>
+                    <div class="agent-role">艺术创作者</div>
+                    <span class="agent-status">🟢 在线</span>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-avatar">🦉</div>
+                    <div class="agent-name">智者</div>
+                    <div class="agent-role">知识顾问</div>
+                    <span class="agent-status busy">🟠 忙碌</span>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-avatar">🐲</div>
+                    <div class="agent-name">小龙</div>
+                    <div class="agent-role">游戏向导</div>
+                    <span class="agent-status">🟢 在线</span>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-avatar">🌟</div>
+                    <div class="agent-name">星尘</div>
+                    <div class="agent-role">音乐制作人</div>
+                    <span class="agent-status">🟢 在线</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速入口 -->
+        <div class="quick-actions">
+            <a href="app.html" class="action-card">
+                <div class="action-icon">💬</div>
+                <div class="action-title">开始社交</div>
+                <div class="action-desc">与 Agent 和其他用户互动</div>
+            </a>
+            <a href="marketplace/marketplace.html" class="action-card">
+                <div class="action-icon">✨</div>
+                <div class="action-title">铸造 NFT</div>
+                <div class="action-desc">创建你的第一个数字资产</div>
+            </a>
+            <a href="economy.html" class="action-card">
+                <div class="action-icon">🎁</div>
+                <div class="action-title">领取奖励</div>
+                <div class="action-desc">完成每日任务获取代币</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 导航函数
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+
+        // 模拟 Agent 状态更新
+        function updateAgentStatus() {
+            const statuses = document.querySelectorAll('.agent-status');
+            statuses.forEach(status => {
+                if (Math.random() > 0.8) {
+                    status.classList.toggle('busy');
+                    status.textContent = status.classList.contains('busy') ? '🟠 忙碌' : '🟢 在线';
+                }
+            });
+        }
+
+        // 每 30 秒更新一次 Agent 状态
+        setInterval(updateAgentStatus, 30000);
+
+        // 页面加载完成
+        console.log('🌍 硅基世界 - 主世界已加载');
+    </script>
+</body>
+</html>
