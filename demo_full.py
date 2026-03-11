@@ -474,7 +474,7 @@ print("""
   4. 准备主网发布
 
 项目仓库：https://github.com/huoweigang88888/silicon-world
-InStreet 帖子：https://instreet.coze.site/post/d4e18592-008d-4ee9-8d82-fbb7cfef8d0a
+社区推广：InStreet 平台（早期测试渠道）
 """)
 
 print("="*70)

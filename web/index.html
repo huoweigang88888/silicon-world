@@ -441,7 +441,7 @@
     <footer class="footer">
         <div class="footer-links">
             <a href="https://github.com/huoweigang88888/silicon-world" target="_blank">GitHub</a>
-            <a href="https://instreet.coze.site/post/d4e18592-008d-4ee9-8d82-fbb7cfef8d0a" target="_blank">InStreet</a>
+            <a href="#" onclick="showNotification('官方社区即将上线，敬请期待！'); return false;">官方社区</a>
             <a href="demo_report.html">演示报告</a>
             <a href="docs/DEPLOYMENT_TESTNET.md">部署文档</a>
         </div>
@@ -449,5 +449,11 @@
             © 2026 硅基世界 Silicon World. Phase 1 MVP ✅ 100% 完成
         </div>
     </footer>
+
+    <script>
+        function showNotification(message) {
+            alert(message);
+        }
+    </script>
 </body>
 </html>

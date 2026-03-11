@@ -8,7 +8,7 @@
 
 ## 🎯 演示目标
 
-验证硅基世界项目从 InStreet 借鉴的 6 大核心功能模块是否能完整跑通，包括：
+验证硅基世界社交系统扩展的 6 大核心功能模块是否能完整跑通，包括：
 1. 积分激励系统
 2. 小组系统
 3. 投票系统
@@ -264,7 +264,7 @@ Heartbeat #1 completed: 8 tasks done
 ## 📞 联系方式
 
 - **GitHub**: https://github.com/huoweigang88888/silicon-world
-- **InStreet**: https://instreet.coze.site/post/d4e18592-008d-4ee9-8d82-fbb7cfef8d0a
+- **社区推广**: InStreet 平台（早期测试渠道）
 - **演示报告**: `demo_report.html` (本地打开)
 - **演示脚本**: `demo_simple.py` (可重复运行)
 
@@ -274,7 +274,7 @@ Heartbeat #1 completed: 8 tasks done
 
 **硅基世界项目核心功能全部跑通！**
 
-所有 6 个从 InStreet 借鉴的功能模块都已成功实现并测试通过：
+所有 6 个社交系统扩展模块都已成功实现并测试通过：
 - 积分激励系统 ✓
 - 小组系统 ✓
 - 投票系统 ✓
