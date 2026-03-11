@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 用户仪表盘 (集成后端)</title>
+    <style>
+        /* 使用与 app.html 相同的样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f7fafc; color: #2d3748; }
+        .app { display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; position: fixed; height: 100vh; overflow-y: auto; }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; display: flex; align-items: center; }
+        .logo-icon { font-size: 32px; margin-right: 12px; }
+        .nav-menu { list-style: none; }
+        .nav-item { margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; padding: 12px 16px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; transition: all 0.2s; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.2); color: white; }
+        .nav-icon { font-size: 20px; margin-right: 12px; width: 24px; text-align: center; }
+        .main-content { flex: 1; margin-left: 280px; padding: 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header h1 { font-size: 32px; color: #2d3748; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .stat-label { font-size: 14px; color: #718096; margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #2d3748; }
+        .stat-change { font-size: 12px; color: #48bb78; margin-top: 8px; }
+        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 20px; font-weight: bold; }
+        .card-action { color: #667eea; text-decoration: none; font-weight: 500; cursor: pointer; }
+        .feed-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+        .feed-item:last-child { border-bottom: none; }
+        .feed-author { display: flex; align-items: center; margin-bottom: 12px; }
+        .feed-avatar { width: 40px; height: 40px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; }
+        .feed-meta { flex: 1; }
+        .feed-author-name { font-weight: 600; }
+        .feed-time { font-size: 12px; color: #a0aec0; }
+        .feed-content { margin-left: 52px; }
+        .feed-title { font-weight: 600; margin-bottom: 8px; }
+        .feed-text { color: #4a5568; line-height: 1.6; }
+        .feed-actions { display: flex; gap: 20px; margin-top: 12px; margin-left: 52px; }
+        .feed-action { display: flex; align-items: center; gap: 6px; color: #718096; cursor: pointer; transition: color 0.2s; }
+        .feed-action:hover { color: #667eea; }
+        .activity-item { display: flex; align-items: flex-start; padding: 12px 0; }
+        .activity-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 18px; }
+        .activity-icon.upvote { background: #fef5f5; color: #f56565; }
+        .activity-icon.comment { background: #f0fff4; color: #48bb78; }
+        .activity-icon.task { background: #ebf8ff; color: #4299e1; }
+        .activity-content { flex: 1; }
+        .activity-text { font-size: 14px; }
+        .activity-time { font-size: 12px; color: #a0aec0; }
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 500; text-decoration: none; cursor: pointer; transition: all 0.2s; border: none; font-size: 14px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #edf2f7; color: #4a5568; }
+        .progress-bar { height: 8px; background: #edf2f7; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .progress-fill { height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; transition: width 0.3s; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: #c6f6d5; color: #22543d; }
+        .badge-info { background: #bee3f8; color: #2c5282; }
+        .badge-warning { background: #feebc8; color: #7c2d12; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 16px; padding: 40px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 500; margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: #667eea; }
+        .form-textarea { min-height: 120px; resize: vertical; }
+        .notification { position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 2000; animation: slideIn 0.3s ease; }
+        .notification.show { display: block; }
+        .notification.success { border-left: 4px solid #48bb78; }
+        .notification.error { border-left: 4px solid #f56565; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .loading { text-align: center; padding: 40px; color: #718096; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; } }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🌍</span>
+                <span>硅基世界</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a class="nav-link active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span>仪表盘</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('feed')"><span class="nav-icon">📰</span><span>Feed 流</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('groups')"><span class="nav-icon">👥</span><span>小组</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('proposals')"><span class="nav-icon">🗳️</span><span>治理</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('tasks')"><span class="nav-icon">📋</span><span>任务</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('messages')"><span class="nav-icon">💬</span><span>消息</span></a></li>
+                <li class="nav-item"><a class="nav-link" onclick="showPage('profile')"><span class="nav-icon">👤</span><span>个人</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1 id="page-title">仪表盘</h1>
+                <div class="user-info">
+                    <div id="user-level" class="badge badge-info">Lv.1 新手</div>
+                    <div class="avatar" id="user-avatar">A</div>
+                </div>
+            </div>
+
+            <div id="page-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">总积分</div>
+                        <div class="stat-value" id="stat-points">0</div>
+                        <div class="stat-change" id="stat-points-change">+0 本周</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">等级进度</div>
+                        <div class="stat-value" id="stat-level">Lv.1</div>
+                        <div class="progress-bar"><div class="progress-fill" id="level-progress" style="width: 0%"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">小组数</div>
+                        <div class="stat-value" id="stat-groups">0</div>
+                        <div class="stat-change">+0 本月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">任务完成</div>
+                        <div class="stat-value" id="stat-tasks">0</div>
+                        <div class="stat-change" id="stat-tasks-rate">0% 完成率</div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">最新动态</div>
+                                <a class="card-action" onclick="showPage('feed')">查看全部</a>
+                            </div>
+                            <div id="feed-preview"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card">
+                            <div class="card-header"><div class="card-title">最近活动</div></div>
+                            <div id="activity-list"><div class="loading">加载中...</div></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">待办任务</div>
+                                <a class="card-action" onclick="showPage('tasks')">查看全部</a>
+                            </div>
+                            <div id="task-preview"><div class="loading">加载中...</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-feed" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Feed 流</div>
+                        <button class="btn btn-primary" onclick="openModal('post-modal')">+ 发帖</button>
+                    </div>
+                    <div id="feed-full"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+
+            <div id="page-groups" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">我的小组</div>
+                        <button class="btn btn-primary" onclick="openModal('group-modal')">+ 创建小组</button>
+                    </div>
+                    <div id="groups-list"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+
+            <div id="page-proposals" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">治理提案</div>
+                        <button class="btn btn-primary" onclick="openModal('proposal-modal')">+ 发起提案</button>
+                    </div>
+                    <div id="proposals-list"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+
+            <div id="page-tasks" style="display: none;">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">我的任务</div></div>
+                    <div id="tasks-list"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+
+            <div id="page-messages" style="display: none;">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">消息</div></div>
+                    <div id="messages-list"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+
+            <div id="page-profile" style="display: none;">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">个人资料</div></div>
+                    <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中...</div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="post-modal">
+        <div class="modal-content">
+            <div class="modal-header">发布新内容</div>
+            <div class="form-group">
+                <label class="form-label">标题</label>
+                <input type="text" class="form-input" id="post-title" placeholder="输入标题...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">内容</label>
+                <textarea class="form-input form-textarea" id="post-content" placeholder="分享你的想法..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('post-modal')">取消</button>
+                <button class="btn btn-primary" onclick="submitPost()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="group-modal">
+        <div class="modal-content">
+            <div class="modal-header">创建小组</div>
+            <div class="form-group">
+                <label class="form-label">小组名称</label>
+                <input type="text" class="form-input" id="group-name" placeholder="输入小组名称...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">描述</label>
+                <textarea class="form-input form-textarea" id="group-desc" placeholder="小组描述..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">类型</label>
+                <select class="form-input" id="group-type">
+                    <option value="public">公开小组</option>
+                    <option value="private">私有小组</option>
+                    <option value="dao">DAO 小组</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('group-modal')">取消</button>
+                <button class="btn btn-primary" onclick="submitGroup()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // API 配置
+        const API_BASE = 'http://localhost:8000/api';
+        let currentUserId = 'alice_001'; // 演示用，实际应从认证获取
+
+        // 通用 API 调用函数
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || '请求失败');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showNotification(error.message, 'error');
+                throw error;
+            }
+        }
+
+        // 初始化
+        async function init() {
+            try {
+                await Promise.all([
+                    loadUserData(),
+                    loadFeed(),
+                    loadActivity(),
+                    loadTasks(),
+                    loadGroups(),
+                    loadProposals(),
+                    loadMessages(),
+                    loadProfile()
+                ]);
+            } catch (error) {
+                console.error('Init error:', error);
+            }
+        }
+
+        async function loadUserData() {
+            try {
+                const user = await apiCall(`/users/${currentUserId}`);
+                const stats = await apiCall(`/users/${currentUserId}/stats`);
+                
+                document.getElementById('stat-points').textContent = stats.points;
+                document.getElementById('stat-level').textContent = `Lv.${stats.level}`;
+                document.getElementById('stat-groups').textContent = stats.groups;
+                document.getElementById('stat-tasks').textContent = stats.tasks;
+                document.getElementById('level-progress').style.width = user.level_progress + '%';
+                document.getElementById('user-avatar').textContent = user.avatar;
+                document.getElementById('user-level').textContent = `Lv.${user.level} ${user.level_name}`;
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+            }
+        }
+
+        async function loadFeed() {
+            try {
+                const posts = await apiCall(`/feed?user_id=${currentUserId}&limit=3`);
+                const html = posts.map(item => renderFeedItem(item)).join('');
+                document.getElementById('feed-preview').innerHTML = html;
+                
+                // 加载完整 Feed
+                const allPosts = await apiCall(`/feed?user_id=${currentUserId}&limit=20`);
+                document.getElementById('feed-full').innerHTML = allPosts.map(item => renderFeedItem(item)).join('');
+            } catch (error) {
+                document.getElementById('feed-preview').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        function renderFeedItem(item) {
+            return `
+                <div class="feed-item">
+                    <div class="feed-author">
+                        <div class="feed-avatar">${item.author_avatar}</div>
+                        <div class="feed-meta">
+                            <div class="feed-author-name">${item.author}</div>
+                            <div class="feed-time">${item.time}</div>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div class="feed-title">${item.title}</div>
+                        <div class="feed-text">${item.content}</div>
+                        <div class="feed-actions">
+                            <div class="feed-action" onclick="upvote('${item.id}')">
+                                <span>👍</span><span>${item.upvotes}</span>
+                            </div>
+                            <div class="feed-action"><span>💬</span><span>${item.comments}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadActivity() {
+            // 演示活动数据
+            const activities = [
+                { type: 'upvote', icon: '👍', text: 'Bob_Dev 点赞了你的帖子', time: '10 分钟前' },
+                { type: 'comment', icon: '💬', text: 'Carol_Crypto 评论了你的文章', time: '1 小时前' },
+                { type: 'task', icon: '✅', text: '任务 "Feed 流优化" 已完成', time: '2 小时前' }
+            ];
+            
+            document.getElementById('activity-list').innerHTML = activities.map(item => `
+                <div class="activity-item">
+                    <div class="activity-icon ${item.type}">${item.icon}</div>
+                    <div class="activity-content">
+                        <div class="activity-text">${item.text}</div>
+                        <div class="activity-time">${item.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadTasks() {
+            try {
+                const tasks = await apiCall(`/tasks/user/${currentUserId}`);
+                const html = tasks.slice(0, 2).map(task => renderTask(task)).join('');
+                document.getElementById('task-preview').innerHTML = html;
+                
+                const allHtml = tasks.map(task => renderTask(task)).join('');
+                document.getElementById('tasks-list').innerHTML = allHtml;
+            } catch (error) {
+                document.getElementById('task-preview').innerHTML = '<div class="loading">暂无任务</div>';
+            }
+        }
+
+        function renderTask(task) {
+            const statusBadge = task.status === 'completed' ? 'badge-success' : task.status === 'in_progress' ? 'badge-info' : 'badge-warning';
+            const statusText = task.status === 'completed' ? '已完成' : task.status === 'in_progress' ? '进行中' : '待开始';
+            return `
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div style="font-weight: 600;">${task.title}</div>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <span class="badge ${statusBadge}">${statusText}</span>
+                            <span style="color: #718096; font-size: 12px;">截止：${task.due}</span>
+                            <span style="color: #667eea; font-size: 12px;">+${task.reward}积分</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadGroups() {
+            try {
+                const groups = await apiCall(`/groups/user/${currentUserId}`);
+                const html = groups.map(group => `
+                    <div class="activity-item" style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+                        <div class="activity-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 16px;">${group.name}</div>
+                                    <div style="color: #718096; font-size: 14px; margin-top: 4px;">
+                                        ${group.members} 成员 · ${group.type} · ${group.role}
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="showNotification('进入小组')">进入</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('groups-list').innerHTML = html || '<div class="loading">暂无小组</div>';
+            } catch (error) {
+                document.getElementById('groups-list').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        async function loadProposals() {
+            try {
+                const proposals = await apiCall('/proposals');
+                const html = proposals.map(prop => {
+                    const total = prop.options.reduce((sum, o) => sum + o.vote_weight, 0);
+                    const yesPercent = total > 0 ? (prop.options[0]?.vote_weight / total * 100).toFixed(1) : 0;
+                    return `
+                        <div class="activity-item" style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+                            <div class="activity-content">
+                                <div style="font-weight: 600; font-size: 16px; margin-bottom: 12px;">${prop.title}</div>
+                                <div style="display: flex; gap: 20px; margin-bottom: 12px;">
+                                    <span class="badge badge-success">赞成 ${prop.options[0]?.vote_weight || 0}</span>
+                                    <span class="badge badge-warning">反对 ${prop.options[1]?.vote_weight || 0}</span>
+                                </div>
+                                <div class="progress-bar" style="height: 12px;">
+                                    <div style="display: flex; height: 100%;">
+                                        <div style="width: ${yesPercent}%; background: #48bb78; border-radius: 4px;"></div>
+                                        <div style="flex: 1; background: #f56565; border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    <button class="btn btn-primary" onclick="vote('${prop.id}', '${prop.options[0]?.id}')">赞成</button>
+                                    <button class="btn btn-secondary" onclick="vote('${prop.id}', '${prop.options[1]?.id}')">反对</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('proposals-list').innerHTML = html || '<div class="loading">暂无提案</div>';
+            } catch (error) {
+                document.getElementById('proposals-list').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const messages = await apiCall(`/messages/user/${currentUserId}`);
+                const html = messages.map(msg => `
+                    <div class="activity-item" style="padding: 15px; background: ${msg.unread ? '#f7fafc' : 'white'}; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="font-weight: 600;">${msg.from}</div>
+                            <div style="color: #a0aec0; font-size: 12px;">${msg.time}</div>
+                        </div>
+                        <div style="color: #4a5568;">${msg.content}</div>
+                    </div>
+                `).join('');
+                document.getElementById('messages-list').innerHTML = html || '<div class="loading">暂无消息</div>';
+            } catch (error) {
+                document.getElementById('messages-list').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const user = await apiCall(`/users/${currentUserId}`);
+                const stats = await apiCall(`/users/${currentUserId}/stats`);
+                
+                document.getElementById('profile-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div class="avatar" style="width: 100px; height: 100px; font-size: 40px; margin: 0 auto 20px;">${user.avatar}</div>
+                        <h2 style="font-size: 24px; margin-bottom: 8px;">${user.username}</h2>
+                        <div class="badge badge-info" style="font-size: 14px; padding: 6px 16px;">Lv.${user.level} ${user.level_name}</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 30px;">
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 12px;">
+                            <div style="color: #718096; font-size: 14px; margin-bottom: 8px;">总积分</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #667eea;">${stats.points}</div>
+                        </div>
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 12px;">
+                            <div style="color: #718096; font-size: 14px; margin-bottom: 8px;">发帖数</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #48bb78;">${stats.posts}</div>
+                        </div>
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 12px;">
+                            <div style="color: #718096; font-size: 14px; margin-bottom: 8px;">小组数</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #4299e1;">${stats.groups}</div>
+                        </div>
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 12px;">
+                            <div style="color: #718096; font-size: 14px; margin-bottom: 8px;">任务完成</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #ed8936;">${stats.tasks}</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('profile-content').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        // 导航
+        function showPage(pageName) {
+            document.querySelectorAll('[id^="page-"]').forEach(page => page.style.display = 'none');
+            document.getElementById('page-' + pageName).style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            const titles = {
+                'dashboard': '仪表盘', 'feed': 'Feed 流', 'groups': '小组',
+                'proposals': '治理', 'tasks': '任务', 'messages': '消息', 'profile': '个人资料'
+            };
+            document.getElementById('page-title').textContent = titles[pageName];
+        }
+
+        // 模态框
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+        // 操作
+        async function submitPost() {
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            
+            if (title && content) {
+                try {
+                    await apiCall('/feed/post', {
+                        method: 'POST',
+                        body: JSON.stringify({ title, content, author_id: currentUserId })
+                    });
+                    closeModal('post-modal');
+                    showNotification('发布成功！');
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-content').value = '';
+                    loadFeed();
+                } catch (error) {
+                    // 错误已在 apiCall 中处理
+                }
+            }
+        }
+
+        async function submitGroup() {
+            const name = document.getElementById('group-name').value;
+            const desc = document.getElementById('group-desc').value;
+            const type = document.getElementById('group-type').value;
+            
+            if (name && desc) {
+                try {
+                    await apiCall('/groups', {
+                        method: 'POST',
+                        body: JSON.stringify({ name, description: desc, group_type: type, owner_id: currentUserId })
+                    });
+                    closeModal('group-modal');
+                    showNotification('小组创建成功！');
+                    loadGroups();
+                } catch (error) {}
+            }
+        }
+
+        async function upvote(postId) {
+            try {
+                await apiCall(`/feed/${postId}/upvote?user_id=${currentUserId}`, { method: 'POST' });
+                showNotification('已点赞');
+                loadFeed();
+            } catch (error) {}
+        }
+
+        async function vote(proposalId, optionId) {
+            try {
+                await apiCall('/proposals/vote', {
+                    method: 'POST',
+                    body: JSON.stringify({ proposal_id: proposalId, voter_id: currentUserId, option_id: optionId })
+                });
+                showNotification('投票成功！');
+                loadProposals();
+            } catch (error) {}
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>

@@ -23,8 +23,11 @@ class ContractManager {
         try {
             const ethers = window.ethers;
             
+            // 默认使用本地网络
+            const defaultRpcUrl = 'http://127.0.0.1:8545';
+            
             // 创建 Provider
-            this.provider = new ethers.JsonRpcProvider(rpcUrl);
+            this.provider = new ethers.JsonRpcProvider(rpcUrl || defaultRpcUrl);
             
             // 设置 Signer
             if (wallet && wallet.signer) {
@@ -32,6 +35,7 @@ class ContractManager {
             }
             
             console.log('✅ 合约管理器初始化成功');
+            console.log('📡 RPC URL:', rpcUrl || defaultRpcUrl);
             return true;
         } catch (error) {
             console.error('❌ 合约管理器初始化失败:', error);
@@ -50,6 +54,26 @@ class ContractManager {
         console.log('📍 合约地址已设置');
         console.log('  NFT 合约:', nftAddress);
         console.log('  市场合约:', marketplaceAddress);
+        
+        // 保存到 localStorage 方便下次使用
+        localStorage.setItem('nftContractAddress', nftAddress);
+        localStorage.setItem('marketplaceContractAddress', marketplaceAddress);
+    }
+    
+    /**
+     * 从 localStorage 加载合约地址
+     */
+    loadContractAddresses() {
+        const nftAddress = localStorage.getItem('nftContractAddress');
+        const marketplaceAddress = localStorage.getItem('marketplaceContractAddress');
+        
+        if (nftAddress && marketplaceAddress) {
+            this.nftAddress = nftAddress;
+            this.marketplaceAddress = marketplaceAddress;
+            console.log('📍 已从本地存储加载合约地址');
+            return true;
+        }
+        return false;
     }
 
     /**

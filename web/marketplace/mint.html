@@ -240,10 +240,10 @@
                 const rpcUrl = 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'; // 公共 RPC
                 await contractManager.init(rpcUrl, wallet);
                 
-                // 设置合约地址 (暂时使用占位符)
+                // 设置合约地址 (本地部署)
                 contractManager.setContractAddresses(
-                    '0x0000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000'
+                    '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+                    '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
                 );
                 
                 // 加载合约
