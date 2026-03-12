@@ -11,7 +11,7 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log(`部署者：${deployer.address}`);
   
-  const balance = await deployer.getBalance();
+  const balance = await ethers.provider.getBalance(deployer.address);
   console.log(`余额：${ethers.utils.formatEther(balance)} ETH`);
   console.log();
   
