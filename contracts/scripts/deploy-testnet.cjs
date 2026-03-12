@@ -14,10 +14,9 @@ const { ethers } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 
-// 部署配置
+// 部署配置 (initialSupply 在 main 函数中设置)
 const CONFIG = {
   network: "sepolia",  // 更新为 Sepolia (Goerli 已废弃)
-  initialSupply: ethers.utils.parseEther("1000000"), // 100 万代币
   tokenName: "Silicon World Token",
   tokenSymbol: "SWT",
 };
@@ -36,6 +35,9 @@ async function main() {
   console.log(`网络：${CONFIG.network}`);
   console.log(`部署者：${(await ethers.getSigners())[0].address}`);
   console.log();
+
+  // 设置初始供应量
+  CONFIG.initialSupply = ethers.utils.parseEther("1000000"); // 100 万代币
 
   // 1. 部署代币合约
   console.log("[1/4] 部署代币合约...");
