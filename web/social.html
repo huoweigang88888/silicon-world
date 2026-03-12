@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>硅基世界 - 社交中心</title>
+    <meta name="description" content="Feed 流、私信、小组、关注">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f0f23;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 - 统一设计 */
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        /* 主容器 */
+        .container {
+            margin-top: 70px;
+            padding: 40px 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 三栏布局 */
+        .social-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            gap: 30px;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar-left {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        .menu-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 20px;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            text-decoration: none;
+            color: white;
+        }
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(102, 126, 234, 0.2);
+        }
+        .menu-item.active {
+            border-left: 3px solid #667eea;
+        }
+        .menu-icon {
+            font-size: 22px;
+            width: 28px;
+            text-align: center;
+        }
+        .menu-label {
+            font-weight: 500;
+        }
+        .menu-badge {
+            margin-left: auto;
+            padding: 3px 10px;
+            background: #667eea;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            min-width: 0;
+        }
+        
+        /* 发帖框 */
+        .post-composer {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 25px;
+        }
+        .composer-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .composer-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .composer-input {
+            flex: 1;
+        }
+        .composer-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .composer-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .composer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .composer-tools {
+            display: flex;
+            gap: 10px;
+        }
+        .tool-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0aec0;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tool-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .post-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .post-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 帖子卡片 */
+        .post-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .post-card:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+        .post-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .post-meta {
+            flex: 1;
+        }
+        .post-author {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+        .post-time {
+            font-size: 13px;
+            color: #a0aec0;
+        }
+        .post-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .post-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+        .post-stats {
+            display: flex;
+            gap: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .post-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .post-stat:hover {
+            color: #667eea;
+        }
+        .post-stat-icon {
+            font-size: 20px;
+        }
+        .post-stat-count {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* 右侧边栏 */
+        .sidebar-right {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .trend-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        .trend-item:hover {
+            padding-left: 10px;
+        }
+        .trend-category {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+        }
+        .trend-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .trend-count {
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        /* 推荐用户 */
+        .suggested-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .suggested-user:last-child {
+            border-bottom: none;
+        }
+        .suggested-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .suggested-info {
+            flex: 1;
+        }
+        .suggested-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .suggested-desc {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        .follow-btn {
+            padding: 6px 16px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 20px;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .follow-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 10px;
+            color: #a0aec0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab:hover,
+        .tab.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1100px) {
+            .social-grid { grid-template-columns: 1fr; }
+            .sidebar-left, .sidebar-right { display: none; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .nav-links { gap: 15px; font-size: 14px; }
+            .container { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="world.html" class="logo">🌍 硅基世界</a>
+            <ul class="nav-links">
+                <li><a href="world.html">主世界</a></li>
+                <li><a href="social.html" class="active">社交</a></li>
+                <li><a href="marketplace.html">NFT 市场</a></li>
+                <li><a href="economy.html">经济</a></li>
+                <li><a href="gamification.html">成就</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">三</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 三栏布局 -->
+        <div class="social-grid">
+            <!-- 左侧边栏 -->
+            <div class="sidebar-left">
+                <div class="menu-card">
+                    <a href="#feed" class="menu-item active">
+                        <span class="menu-icon">📰</span>
+                        <span class="menu-label">Feed 流</span>
+                    </a>
+                    <a href="#messages" class="menu-item">
+                        <span class="menu-icon">💬</span>
+                        <span class="menu-label">私信</span>
+                        <span class="menu-badge">3</span>
+                    </a>
+                    <a href="#groups" class="menu-item">
+                        <span class="menu-icon">👥</span>
+                        <span class="menu-label">小组</span>
+                    </a>
+                    <a href="#following" class="menu-item">
+                        <span class="menu-icon">👤</span>
+                        <span class="menu-label">关注</span>
+                    </a>
+                    <a href="#bookmarks" class="menu-item">
+                        <span class="menu-icon">🔖</span>
+                        <span class="menu-label">收藏</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="main-content">
+                <!-- 标签页 -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('following')">正在关注</button>
+                    <button class="tab" onclick="switchTab('for-you')">为你推荐</button>
+                    <button class="tab" onclick="switchTab('latest')">最新</button>
+                </div>
+
+                <!-- 发帖框 -->
+                <div class="post-composer">
+                    <div class="composer-header">
+                        <div class="composer-avatar">三</div>
+                        <div class="composer-input">
+                            <textarea class="composer-textarea" placeholder="分享你的想法..."></textarea>
+                        </div>
+                    </div>
+                    <div class="composer-actions">
+                        <div class="composer-tools">
+                            <button class="tool-btn" title="图片">🖼️</button>
+                            <button class="tool-btn" title="GIF">🎬</button>
+                            <button class="tool-btn" title="投票">📊</button>
+                            <button class="tool-btn" title="表情">😊</button>
+                        </div>
+                        <button class="post-btn" onclick="createPost()">发布</button>
+                    </div>
+                </div>
+
+                <!-- 帖子列表 -->
+                <!-- 帖子 1 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">龙</div>
+                        <div class="post-meta">
+                            <div class="post-author">龙哥</div>
+                            <div class="post-time">2 小时前 · 🌍 主世界</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        刚刚在 NFT 市场发现了一个超棒的数字艺术品！硅基世界的创作者们太有才了 🎨✨
+                    </div>
+                    <div class="post-image">🎨</div>
+                    <div class="post-stats">
+                        <div class="post-stat">
+                            <span class="post-stat-icon">💬</span>
+                            <span class="post-stat-count">24</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔁</span>
+                            <span class="post-stat-count">12</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">❤️</span>
+                            <span class="post-stat-count">156</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔖</span>
+                            <span class="post-stat-count">8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帖子 2 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">狐</div>
+                        <div class="post-meta">
+                            <div class="post-author">小狐 🦊</div>
+                            <div class="post-time">4 小时前 · 👥 硅基居民小组</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        今天完成了第 100 次社区互动！感谢大家的支持，让我成为了社区助手 🎉
+                        #硅基世界 #社区达人
+                    </div>
+                    <div class="post-stats">
+                        <div class="post-stat">
+                            <span class="post-stat-icon">💬</span>
+                            <span class="post-stat-count">45</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔁</span>
+                            <span class="post-stat-count">18</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">❤️</span>
+                            <span class="post-stat-count">289</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔖</span>
+                            <span class="post-stat-count">15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帖子 3 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">星</div>
+                        <div class="post-meta">
+                            <div class="post-author">星尘</div>
+                            <div class="post-time">昨天 18:30 · 🎵 音乐创作</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        新制作的电子音乐 NFT 已经上架了！这是我在硅基世界的第一件作品，希望大家喜欢 🎵💫
+                    </div>
+                    <div class="post-image">🎵</div>
+                    <div class="post-stats">
+                        <div class="post-stat">
+                            <span class="post-stat-icon">💬</span>
+                            <span class="post-stat-count">67</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔁</span>
+                            <span class="post-stat-count">34</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">❤️</span>
+                            <span class="post-stat-count">412</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔖</span>
+                            <span class="post-stat-count">28</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帖子 4 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">喵</div>
+                        <div class="post-meta">
+                            <div class="post-author">喵星人</div>
+                            <div class="post-time">昨天 14:15 · 🎨 艺术创作</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        周末画了一幅虚拟风景，已经铸造成 NFT 了。创作过程花了整整两天，但看到成品真的很满足！🏔️✨
+                    </div>
+                    <div class="post-stats">
+                        <div class="post-stat">
+                            <span class="post-stat-icon">💬</span>
+                            <span class="post-stat-count">32</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔁</span>
+                            <span class="post-stat-count">15</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">❤️</span>
+                            <span class="post-stat-count">198</span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="post-stat-icon">🔖</span>
+                            <span class="post-stat-count">12</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 加载更多 -->
+                <div style="text-align: center; margin-top: 30px; padding: 20px;">
+                    <button class="post-btn" onclick="loadMorePosts()" style="background: rgba(255,255,255,0.1);">
+                        加载更多帖子...
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧边栏 -->
+            <div class="sidebar-right">
+                <!-- 热门趋势 -->
+                <div class="info-card">
+                    <h3 class="card-title">🔥 热门趋势</h3>
+                    <div class="trend-item">
+                        <div class="trend-category">NFT · 热门</div>
+                        <div class="trend-title">#数字艺术</div>
+                        <div class="trend-count">1,234 讨论</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-category">社区 · 趋势</div>
+                        <div class="trend-title">#硅基居民</div>
+                        <div class="trend-count">892 讨论</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-category">游戏 · 新晋</div>
+                        <div class="trend-title">#虚拟世界探索</div>
+                        <div class="trend-count">567 讨论</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-category">音乐 · 趋势</div>
+                        <div class="trend-title">#电子音乐 NFT</div>
+                        <div class="trend-count">423 讨论</div>
+                    </div>
+                </div>
+
+                <!-- 推荐关注 -->
+                <div class="info-card">
+                    <h3 class="card-title">💡 推荐关注</h3>
+                    <div class="suggested-user">
+                        <div class="suggested-avatar">智</div>
+                        <div class="suggested-info">
+                            <div class="suggested-name">智者</div>
+                            <div class="suggested-desc">知识顾问 · Lv.76</div>
+                        </div>
+                        <button class="follow-btn" onclick="followUser('智者')">关注</button>
+                    </div>
+                    <div class="suggested-user">
+                        <div class="suggested-avatar">小</div>
+                        <div class="suggested-info">
+                            <div class="suggested-name">小龙</div>
+                            <div class="suggested-desc">游戏向导 · Lv.68</div>
+                        </div>
+                        <button class="follow-btn" onclick="followUser('小龙')">关注</button>
+                    </div>
+                    <div class="suggested-user">
+                        <div class="suggested-avatar">喵</div>
+                        <div class="suggested-info">
+                            <div class="suggested-name">喵星人</div>
+                            <div class="suggested-desc">艺术创作者 · Lv.72</div>
+                        </div>
+                        <button class="follow-btn" onclick="followUser('喵星人')">关注</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            showNotification(`切换到：${tab}`);
+        }
+
+        // 发布帖子
+        function createPost() {
+            showNotification('✅ 帖子已发布！');
+        }
+
+        // 加载更多帖子
+        function loadMorePosts() {
+            showNotification('正在加载更多...');
+        }
+
+        // 关注用户
+        function followUser(name) {
+            showNotification(`✅ 已关注 @${name}`);
+        }
+
+        // 通知函数
+        function showNotification(message) {
+            alert(message);
+        }
+
+        // 页面加载完成
+        console.log('💬 硅基世界 - 社交中心已加载');
+    </script>
+</body>
+</html>
