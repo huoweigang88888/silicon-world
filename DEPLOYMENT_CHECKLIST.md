@@ -1,161 +1,163 @@
-# 🚀 硅基世界 - 测试网部署检查清单
+# 硅基世界部署检查清单
 
-_创建时间：2026-03-08 13:57_
-
----
-
-## ⚠️ 当前状态
-
-| 组件 | 状态 | 说明 |
-|------|------|------|
-| Docker | ❌ 未安装 | 需要安装 Docker Desktop |
-| Python | ✅ 3.13.9 | 已安装 |
-| 项目代码 | ✅ 2802 文件 | 完整 |
-| 智能合约 | ✅ 已编译 | 待部署到测试网 |
-| 环境变量 | ❌ 未配置 | 需要创建 .env 文件 |
+**日期**: 2026-03-12  
+**目标**: Sepolia 测试网部署  
+**状态**: 准备就绪 ✅
 
 ---
 
-## 📋 部署方案选择
+## ✅ 已完成准备
 
-### 方案 A: 本地测试部署 (推荐先做这个)
-**无需 Docker，直接用 Python 运行 API 服务**
-
-**步骤：**
-1. 安装 Python 依赖
-2. 配置 .env 文件
-3. 启动 PostgreSQL (可用 Docker 或本地安装)
-4. 启动 Redis (可用 Docker 或本地安装)
-5. 运行 API 服务
-6. 访问 http://localhost:8000/docs
-
-**优点：** 快速验证，无需复杂配置  
-**缺点：** 仅本地访问，非生产环境
+- [x] 智能合约编译完成
+- [x] 部署脚本更新 (Goerli → Sepolia)
+- [x] Hardhat 配置完成
+- [x] .env 配置文件 (RPC URL 已填写)
+- [x] 部署文档创建
 
 ---
 
-### 方案 B: 完整测试网部署
-**需要 Docker + 区块链测试网配置**
+## 📋 部署步骤
 
-**前置条件：**
-1. 安装 Docker Desktop for Windows
-2. 获取 Infura API Key (https://infura.io)
-3. 准备测试网 ETH (Goerli faucet)
-4. 配置部署私钥
-
-**步骤：**
-1. 安装 Docker Desktop
-2. 创建 .env 文件 (见下方模板)
-3. 运行 `python scripts/deploy-testnet.py`
-4. 合约部署到 Goerli 测试网
-5. API 服务容器化部署
-
-**优点：** 完整的生产环境模拟  
-**缺点：** 需要额外配置和时间
-
----
-
-## 🔧 立即执行：方案 A (本地测试)
-
-### 1. 创建 .env 文件
+### 步骤 1: 确认环境
 
 ```bash
-# 数据库 (先使用 SQLite 简化部署)
-DATABASE_URL=sqlite:///./silicon_world.db
-DATABASE_TYPE=sqlite
+cd C:\Users\zzz\.openclaw\workspace\silicon-world\contracts
 
-# Redis (可选，初期可不用)
-REDIS_URL=redis://localhost:6379
+# 检查 Node.js 版本
+node --version  # 应该 >= 18
 
-# API 配置
-API_HOST=0.0.0.0
-API_PORT=8000
-DEBUG=true
-
-# 区块链 (测试网部署时需要)
-# PRIVATE_KEY=your_private_key_here
-# INFURA_KEY=your_infura_key_here
-# NETWORK=goerli
-
-# LLM 配置
-QWEN_API_KEY=your_qwen_key
-OPENAI_API_KEY=your_openai_key
+# 检查依赖
+npm list hardhat  # 应该显示已安装
 ```
 
-### 2. 安装依赖
+### 步骤 2: 编译合约
 
 ```bash
-cd C:\Users\zzz\.openclaw\workspace\silicon-world
-pip install -r requirements.txt
+# 编译所有合约
+npx hardhat compile
+
+# 预期输出:
+# Compiled X Solidity files successfully
 ```
 
-### 3. 启动 API 服务
+### 步骤 3: 检查账户余额
 
 ```bash
-uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+# 使用 cast 检查 (需要安装 foundry)
+cast balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --rpc-url https://eth-sepolia.g.alchemy.com/v2/AP6EAjqS9hYALHJAFuk1K
+
+# 或使用 web3 检查
+npx hardhat console --network sepolia
+> const [signer] = await ethers.getSigners()
+> await ethers.provider.getBalance(signer.address)
 ```
 
-### 4. 访问 API 文档
+### 步骤 4: 部署合约
 
-浏览器打开：http://localhost:8000/docs
+```bash
+# 部署到 Sepolia
+node scripts/deploy-testnet.js
+
+# 或
+npx hardhat run scripts/deploy-testnet.js --network sepolia
+```
+
+### 步骤 5: 验证合约 (可选)
+
+```bash
+# 验证代币合约
+npx hardhat verify --network sepolia <TOKEN_ADDRESS> 1000000000000000000000000 "Silicon World Token" "SWT"
+```
+
+### 步骤 6: 记录合约地址
+
+部署成功后，合约地址会保存在:
+- `contracts/deployments/sepolia-latest.json`
+- 控制台输出
+
+### 步骤 7: 更新前端配置
+
+编辑以下文件，填入部署的合约地址:
+
+1. `web/js/contracts.js` - 前端合约地址
+2. `server/main.py` - 后端合约配置
+3. `web/economy.html` - 钱包连接配置
+
+### 步骤 8: 测试
+
+1. 打开 `web/world.html` - 检查主世界
+2. 打开 `web/economy.html` - 连接钱包
+3. 打开 `web/marketplace.html` - 查看 NFT
 
 ---
 
-## 📝 方案 B 补充配置 (后续需要时)
+## 🔧 快速部署脚本
 
-### .env 完整模板
+创建 `deploy-quick.bat` (Windows):
 
-```bash
-# ============ 数据库 ============
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/silicon_world
-DATABASE_TYPE=postgresql
+```batch
+@echo off
+echo ========================================
+echo 硅基世界 Sepolia 部署
+echo ========================================
 
-# ============ Redis ============
-REDIS_URL=redis://localhost:6379
+cd /d "%~dp0contracts"
 
-# ============ API ============
-API_HOST=0.0.0.0
-API_PORT=8000
-DEBUG=false
-API_SECRET_KEY=your-secret-key-here
+echo.
+echo [1/4] 检查环境...
+node --version
+npm --version
 
-# ============ 区块链 ============
-PRIVATE_KEY=0xYOUR_PRIVATE_KEY
-INFURA_KEY=your_infura_project_id
-NETWORK=goerli
-CHAIN_ID=5
+echo.
+echo [2/4] 编译合约...
+npx hardhat compile
 
-# ============ LLM ============
-QWEN_API_KEY=sk-xxx
-OPENAI_API_KEY=sk-xxx
+echo.
+echo [3/4] 部署合约...
+node scripts\deploy-testnet.js
 
-# ============ 监控 ============
-SENTRY_DSN=https://xxx@sentry.io/xxx
-LOG_LEVEL=INFO
+echo.
+echo [4/4] 完成！
+echo 查看部署信息：contracts\deployments\sepolia-latest.json
+echo.
+
+pause
 ```
 
-### 获取测试网 ETH
+---
 
-- Goerli Faucet: https://goerlifaucet.com
-- Alchemy Faucet: https://www.alchemy.com/faucets/ethereum-goerli
+## 📊 部署状态追踪
 
-### 创建 Infura 项目
-
-1. 注册 https://infura.io
-2. 创建新项目
-3. 选择 Ethereum 网络
-4. 复制 Project ID (即 INFURA_KEY)
+| 步骤 | 状态 | 时间 | 备注 |
+|------|------|------|------|
+| 环境检查 | ⏳ 待执行 | - | - |
+| 合约编译 | ⏳ 待执行 | - | - |
+| 余额检查 | ⏳ 待执行 | - | 需要 Sepolia ETH |
+| 合约部署 | ⏳ 待执行 | - | 4 个合约 |
+| 合约验证 | ⏳ 待执行 | - | Etherscan |
+| 前端配置 | ⏳ 待执行 | - | 更新合约地址 |
+| 功能测试 | ⏳ 待执行 | - | 端到端测试 |
 
 ---
 
-## 🎯 下一步行动
+## 🎯 部署后任务
 
-**大哥选择：**
-
-1. **先本地测试** → 我马上创建 .env 并启动 API 服务
-2. **直接完整部署** → 需要先安装 Docker，我提供安装指南
-3. **只部署合约** → 配置钱包和 Infura 后单独部署智能合约
+1. **GitHub 更新** - 提交部署信息
+2. **文档更新** - 记录合约地址
+3. **测试用户通知** - 准备测试
+4. **监控设置** - 合约监控
 
 ---
 
-_三一 整理于 2026-03-08_
+## 📞 获取帮助
+
+遇到问题？
+
+1. 检查 `.env` 配置
+2. 查看 Hardhat 错误日志
+3. 检查 Etherscan Gas Tracker
+4. 参考文档：`docs/DEPLOYMENT_TESTNET.md`
+
+---
+
+_准备就绪，等待执行部署命令_

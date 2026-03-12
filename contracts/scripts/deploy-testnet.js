@@ -16,7 +16,7 @@ const path = require("path");
 
 // 部署配置
 const CONFIG = {
-  network: "goerli",
+  network: "sepolia",  // 更新为 Sepolia (Goerli 已废弃)
   initialSupply: ethers.utils.parseEther("1000000"), // 100 万代币
   tokenName: "Silicon World Token",
   tokenSymbol: "SWT",

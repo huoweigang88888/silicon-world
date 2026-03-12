@@ -1,7 +1,8 @@
-import "@nomicfoundation/hardhat-toolbox";
+require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
-export default {
+module.exports = {
   solidity: {
     version: "0.8.20",
     settings: {
@@ -11,33 +12,45 @@ export default {
       }
     }
   },
+  
   networks: {
-    hardhat: {
-      chainId: 31337
-    },
-    goerli: {
-      url: process.env.GOERLI_RPC_URL || "https://eth-goerli.g.alchemy.com/v2/demo",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 5,
-      timeout: 60000,
-      gas: 2100000,
-      gasPrice: 20000000000
-    },
+    // Sepolia 测试网
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      url: process.env.SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
       chainId: 11155111,
-      timeout: 120000,
-      gas: 3000000,
-      gasPrice: 25000000000
+      gasPrice: 20000000000, // 20 Gwei
+      timeout: 180000 // 3 分钟
+    },
+    
+    // 本地开发
+    hardhat: {
+      chainId: 31337,
+      gasPrice: 8000000000, // 8 Gwei
+      blockGasLimit: 30000000
+    },
+    
+    localhost: {
+      url: "http://127.0.0.1:8545",
+      chainId: 31337
     }
   },
+  
+  etherscan: {
+    apiKey: {
+      sepolia: process.env.ETHERSCAN_API_KEY || ""
+    }
+  },
+  
   paths: {
     sources: "./contracts",
+    tests: "./test",
     cache: "./cache",
-    artifacts: "./artifacts"
+    artifacts: "./artifacts",
+    deployments: "./deployments"
   },
+  
   mocha: {
-    timeout: 60000
+    timeout: 100000
   }
 };
