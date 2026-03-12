@@ -1,0 +1,9 @@
+{
+  "network": "sepolia",
+  "timestamp": "2026-03-12T15:32:57.872Z",
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "contracts": {
+    "nft": "0xB456a9B8C7D2b9a46C6D3716f5A67277d21E3f0A",
+    "marketplace": "0xD387ea1Bae2B07C27576Ae9E0E4E19a38fDb84e2"
+  }
+}
