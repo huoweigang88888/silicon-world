@@ -512,10 +512,64 @@
         </div>
     </div>
 
+    <!-- NexusA 连接器 -->
+    <script src="js/nexusa-connector.js"></script>
+    
     <script>
+        // 全局连接器实例
+        let nexusaConnector = null;
+
+        // 连接钱包
+        async function connectWallet() {
+            if (!nexusaConnector) {
+                nexusaConnector = new NexusaConnector({ network: 'sepolia' });
+            }
+
+            const result = await nexusaConnector.connectWallet();
+            
+            if (result.success) {
+                updateWalletUI(result.account);
+                showNotification('✅ 钱包已连接：' + result.account.substring(0, 10) + '...');
+            } else {
+                showNotification('❌ ' + result.error);
+            }
+        }
+
+        // 更新钱包 UI
+        function updateWalletUI(address) {
+            const walletStatus = document.querySelector('.wallet-status');
+            if (walletStatus) {
+                walletStatus.innerHTML = `
+                    <div class="status-dot"></div>
+                    <span>钱包已连接</span>
+                    <span class="wallet-address">${address.substring(0, 10)}...${address.substring(address.length - 8)}</span>
+                `;
+            }
+        }
+
         // 发送代币
-        function sendToken() {
-            showNotification('发送功能即将上线，敬请期待！');
+        async function sendToken() {
+            if (!nexusaConnector || !nexusaConnector.connected) {
+                showNotification('请先连接钱包！');
+                return;
+            }
+
+            const inputs = document.querySelectorAll('.function-card input');
+            const toAddress = inputs[0]?.value;
+            const amount = parseFloat(inputs[1]?.value);
+
+            if (!toAddress || !amount) {
+                showNotification('请填写地址和金额');
+                return;
+            }
+
+            const result = await nexusaConnector.sendPayment(toAddress, amount);
+            
+            if (result.success) {
+                showNotification('✅ 交易已发送：' + result.txHash.substring(0, 20) + '...');
+            } else {
+                showNotification('❌ ' + result.error);
+            }
         }
 
         // 领取奖励
@@ -538,8 +592,28 @@
             alert(message);
         }
 
-        // 页面加载完成
-        console.log('💰 硅基世界 - 经济系统已加载');
+        // 页面加载时检查钱包状态
+        window.addEventListener('load', async () => {
+            console.log('💰 硅基世界 - 经济系统已加载');
+            
+            // 自动连接 (如果之前已授权)
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_accounts' 
+                    });
+                    
+                    if (accounts.length > 0) {
+                        nexusaConnector = new NexusaConnector({ network: 'sepolia' });
+                        nexusaConnector.connected = true;
+                        nexusaConnector.account = accounts[0];
+                        updateWalletUI(accounts[0]);
+                    }
+                } catch (error) {
+                    console.log('钱包未连接');
+                }
+            }
+        });
     </script>
 </body>
 </html>

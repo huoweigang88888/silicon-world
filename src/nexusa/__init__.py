@@ -1,22 +1,15 @@
-"""
-NexusA 集成模块
+# NexusA 集成模块
+# 硅基世界 x NexusA 金融基础设施
 
-AI Agent 金融基础设施集成
-- 钱包管理
-- 支付系统 (x402)
-- 智能合约
-- 经济系统
-"""
-
-from .wallet import WalletManager, Wallet
-from .payment import PaymentProcessor, Payment
-from .config import NexusAConfig
+from .config import NexusaConfig
+from .wallet import WalletConnector
+from .payment import PaymentProcessor
+from .did import DIDManager
 
 __version__ = "1.0.0"
 __all__ = [
-    "WalletManager",
-    "Wallet",
+    "NexusaConfig",
+    "WalletConnector",
     "PaymentProcessor",
-    "Payment",
-    "NexusAConfig",
+    "DIDManager",
 ]

@@ -32,6 +32,17 @@ from social.message_enhanced import MessagingSystem
 from social.feed import SocialGraph, FeedSystem, FeedAlgorithm, ContentType
 from agent.heartbeat import HeartbeatSystem
 
+# NexusA 集成模块 (可选)
+try:
+    from nexusa.config import NexusaConfig
+    from nexusa.wallet import WalletConnector
+    from nexusa.payment import PaymentProcessor
+    from nexusa.did import DIDManager
+    NEXUSA_AVAILABLE = True
+except ImportError:
+    NEXUSA_AVAILABLE = False
+    print("⚠️ NexusA 模块未安装，部分功能不可用")
+
 # 创建 FastAPI 应用
 app = FastAPI(
     title="硅基世界 API",
@@ -635,6 +646,89 @@ async def get_user_messages(user_id: str):
             })
     
     return messages
+
+
+# ============================================================================
+# NexusA 集成端点 (如果可用)
+# ============================================================================
+
+if NEXUSA_AVAILABLE:
+    # 初始化 NexusA 组件
+    nexusa_config = NexusaConfig.from_network("sepolia")
+    wallet_connector = WalletConnector(config=nexusa_config)
+    payment_processor = PaymentProcessor(wallet_connector=wallet_connector)
+    did_manager = DIDManager()
+
+    @app.post("/api/nexusa/wallet/create")
+    async def create_wallet():
+        """创建新钱包"""
+        address, private_key = wallet_connector.create_wallet()
+        
+        # ⚠️ 生产环境不应返回私钥
+        return {
+            "success": True,
+            "address": address,
+            "warning": "请安全保存私钥，不要泄露！"
+        }
+
+    @app.post("/api/nexusa/wallet/connect")
+    async def connect_wallet(address: str):
+        """连接钱包"""
+        success = wallet_connector.connect(address)
+        
+        if success:
+            return {
+                "success": True,
+                "address": address,
+                "info": wallet_connector.get_wallet_info()
+            }
+        else:
+            raise HTTPException(status_code=400, detail="连接失败")
+
+    @app.post("/api/nexusa/did/create")
+    async def create_did(controller: str, metadata: Optional[Dict] = None):
+        """创建 DID"""
+        doc = did_manager.create_did(controller, metadata)
+        
+        return {
+            "success": True,
+            "did": doc.did,
+            "controller": doc.controller,
+            "created": doc.created
+        }
+
+    @app.get("/api/nexusa/did/resolve/{did}")
+    async def resolve_did(did: str):
+        """解析 DID"""
+        doc = did_manager.resolve_did(did)
+        
+        if not doc:
+            raise HTTPException(status_code=404, detail="DID 不存在")
+        
+        return doc
+
+    @app.post("/api/nexusa/payment/send")
+    async def send_payment(to_address: str, amount: float, token: str = "SWC"):
+        """发送支付"""
+        if not wallet_connector.connected_wallet:
+            raise HTTPException(status_code=400, detail="钱包未连接")
+        
+        record = payment_processor.process_payment(to_address, amount, token)
+        
+        return {
+            "success": record.status == "completed",
+            "payment_id": record.id,
+            "tx_hash": record.tx_hash,
+            "status": record.status
+        }
+
+    @app.get("/api/nexusa/payment/history")
+    async def get_payment_history(limit: int = 10):
+        """获取支付历史"""
+        history = payment_processor.get_payment_history(limit)
+        return {"success": True, "history": history}
+
+    print("✅ NexusA 端点已注册")
 
 # --- 心跳端点 ---
 

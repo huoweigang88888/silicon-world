@@ -1,130 +1,74 @@
 """
 NexusA 配置模块
-
-区块链网络配置、合约地址等
 """
 
-from typing import Dict, Optional
-from pydantic import BaseModel
-import os
-from pathlib import Path
+from typing import Optional
+from dataclasses import dataclass
 
 
-class NetworkConfig(BaseModel):
-    """网络配置"""
-    name: str
-    rpc_url: str
-    chain_id: int
-    explorer_url: str
-    currency_symbol: str
-
-
-class NexusAConfig(BaseModel):
-    """
-    NexusA 配置
+@dataclass
+class NexusaConfig:
+    """NexusA 配置类"""
     
-    支持多个网络配置
-    """
-    # 当前网络
-    network: str = "goerli"
+    # 网络配置
+    network: str = "sepolia"  # mainnet, sepolia, localhost
+    rpc_url: str = ""
+    chain_id: int = 11155111  # Sepolia
     
-    # 合约地址
-    marketplace_contract: Optional[str] = None
-    payment_contract: Optional[str] = None
-    token_contract: Optional[str] = None
+    # 合约地址 (Sepolia 测试网)
+    did_registry: str = ""
+    ai_wallet: str = ""
+    payment: str = ""
+    credit_engine: str = ""
+    insurance_pool: str = ""
     
     # API 配置
-    api_timeout: int = 30
-    max_retries: int = 3
+    api_url: str = "http://localhost:3000"
+    api_key: str = ""
     
-    class Config:
-        arbitrary_types_allowed = True
-    
-    # 预定义网络配置
-    NETWORKS: Dict[str, NetworkConfig] = {
-        "goerli": NetworkConfig(
-            name="Goerli",
-            rpc_url=os.getenv("NEXUSA_GOERLI_RPC", "https://goerli.infura.io/v3/YOUR_KEY"),
-            chain_id=5,
-            explorer_url="https://goerli.etherscan.io",
-            currency_symbol="GoerliETH"
-        ),
-        "sepolia": NetworkConfig(
-            name="Sepolia",
-            rpc_url=os.getenv("NEXUSA_SEPOLIA_RPC", "https://sepolia.infura.io/v3/YOUR_KEY"),
-            chain_id=11155111,
-            explorer_url="https://sepolia.etherscan.io",
-            currency_symbol="SepoliaETH"
-        ),
-        "mainnet": NetworkConfig(
-            name="Ethereum Mainnet",
-            rpc_url=os.getenv("NEXUSA_MAINNET_RPC", "https://mainnet.infura.io/v3/YOUR_KEY"),
-            chain_id=1,
-            explorer_url="https://etherscan.io",
-            currency_symbol="ETH"
-        ),
-        "local": NetworkConfig(
-            name="Local Development",
-            rpc_url=os.getenv("NEXUSA_LOCAL_RPC", "http://localhost:8545"),
-            chain_id=31337,
-            explorer_url="",
-            currency_symbol="ETH"
-        )
-    }
-    
-    def get_network(self) -> NetworkConfig:
-        """获取当前网络配置"""
-        return self.NETWORKS.get(self.network, self.NETWORKS["goerli"])
-    
-    def get_rpc_url(self) -> str:
-        """获取 RPC URL"""
-        return self.get_network().rpc_url
-    
-    def get_chain_id(self) -> int:
-        """获取 Chain ID"""
-        return self.get_network().chain_id
-    
-    def get_explorer_url(self, tx_hash: str) -> str:
-        """获取交易浏览器 URL"""
-        base = self.get_network().explorer_url
-        if base:
-            return f"{base}/tx/{tx_hash}"
-        return tx_hash
+    # 钱包配置
+    default_gas_limit: int = 21000
+    max_fee_per_gas: Optional[int] = None
     
     @classmethod
-    def from_env(cls) -> "NexusAConfig":
-        """从环境变量加载配置"""
+    def from_network(cls, network: str = "sepolia") -> "NexusaConfig":
+        """从预定义网络加载配置"""
+        configs = {
+            "mainnet": {
+                "rpc_url": "https://eth-mainnet.g.alchemy.com/v2/",
+                "chain_id": 1,
+            },
+            "sepolia": {
+                "rpc_url": "https://eth-sepolia.g.alchemy.com/v2/",
+                "chain_id": 11155111,
+            },
+            "localhost": {
+                "rpc_url": "http://127.0.0.1:8545",
+                "chain_id": 31337,
+            }
+        }
+        
+        if network not in configs:
+            raise ValueError(f"未知网络：{network}")
+        
+        config = configs[network]
         return cls(
-            network=os.getenv("NEXUSA_NETWORK", "goerli"),
-            marketplace_contract=os.getenv("NEXUSA_MARKETPLACE_CONTRACT"),
-            payment_contract=os.getenv("NEXUSA_PAYMENT_CONTRACT"),
-            token_contract=os.getenv("NEXUSA_TOKEN_CONTRACT"),
-            api_timeout=int(os.getenv("NEXUSA_API_TIMEOUT", "30")),
-            max_retries=int(os.getenv("NEXUSA_MAX_RETRIES", "3"))
+            network=network,
+            rpc_url=config["rpc_url"],
+            chain_id=config["chain_id"],
         )
+    
+    def validate(self) -> bool:
+        """验证配置是否有效"""
+        if not self.rpc_url:
+            return False
+        if self.network != "localhost" and not self.api_key:
+            print("警告：生产环境需要 API Key")
+        return True
+    
+    def __str__(self) -> str:
+        return f"NexusaConfig(network={self.network}, chain_id={self.chain_id})"
 
 
 # 全局配置实例
-_config: Optional[NexusAConfig] = None
-
-
-def get_config() -> NexusAConfig:
-    """获取全局配置"""
-    global _config
-    if _config is None:
-        _config = NexusAConfig.from_env()
-    return _config
-
-
-def set_config(config: NexusAConfig):
-    """设置全局配置"""
-    global _config
-    _config = config
-
-
-# 使用示例
-if __name__ == "__main__":
-    config = get_config()
-    print(f"当前网络：{config.network}")
-    print(f"RPC URL: {config.get_rpc_url()}")
-    print(f"Chain ID: {config.get_chain_id()}")
+default_config = NexusaConfig.from_network("sepolia")
