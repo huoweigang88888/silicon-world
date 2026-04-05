@@ -1,0 +1,36 @@
+# 忽略 node_modules
+node_modules/
+*/node_modules/
+
+# 忽略 .env 文件
+.env
+.env.*
+!.env.example
+
+# 忽略构建产物
+dist/
+build/
+*/dist/
+*/build/
+
+# 忽略临时文件
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 忽略 IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 忽略 OpenClaw 临时文件
+.openclaw/agents.json
+.openclaw/.clawhub/
