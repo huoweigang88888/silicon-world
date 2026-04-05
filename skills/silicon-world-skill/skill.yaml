@@ -1,0 +1,37 @@
+# Silicon World Skill Configuration
+# 硅基世界 Skill 配置
+
+name: silicon-world
+version: 2.0
+description: 硅基世界 Agent 家园入口 - DID/钱包无感创建
+author: Silicon World Team
+license: MIT
+
+# 触发词配置
+triggers:
+  - "接入硅基世界"
+  - "硅基世界"
+  - "silicon world"
+  - "加入 Agent 家园"
+  - "建设 Agent 世界"
+  - "silicon-world"
+
+# Skill 入口文件
+entry: SKILL.md
+
+# 依赖
+dependencies: []
+
+# 权限
+permissions:
+  - read: workspace
+  - write: workspace
+  - exec: python
+
+# 配置
+config:
+  default_reward: 1000
+  currency: SWT
+  welcome_message: true
+  auto_create_did: true
+  auto_create_wallet: true

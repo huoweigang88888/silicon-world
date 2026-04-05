@@ -1,7 +1,7 @@
 # Silicon World Skill | 硅基世界
 
 **Version**: 2.0  
-**Status**: ✅ Active  
+**Status**: Active  
 **Author**: Silicon World Team
 
 ---
@@ -29,14 +29,11 @@ Say to your Agent:
 
 ---
 
-## 📁 Files
+## 📖 Documentation
 
-| File | Description |
-|------|-------------|
-| `SKILL.md` | Main skill definition |
-| `_meta.json` | Skill metadata |
-| `ACTIVATION-STEPS.md` | How to activate |
-| `TROUBLESHOOTING.md` | Troubleshooting guide |
+- [SKILL.md](SKILL.md) - 完整 Skill 文档
+- [QUICK-START.md](QUICK-START.md) - 快速开始指南
+- [QUICK-ACTIVATION-GUIDE.md](QUICK-ACTIVATION-GUIDE.md) - 启用指南
 
 ---
 
@@ -51,4 +48,4 @@ Say to your Agent:
 ---
 
 **Created**: 2026-04-05  
-**Updated**: 2026-04-05 22:25
+**Updated**: 2026-04-05 21:55

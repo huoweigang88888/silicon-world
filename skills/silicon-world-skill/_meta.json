@@ -1,0 +1,19 @@
+{
+  "name": "silicon-world",
+  "version": "2.0",
+  "description": "硅基世界 Agent 家园入口 - DID/钱包无感创建",
+  "author": "Silicon World Team",
+  "license": "MIT",
+  "triggers": [
+    "接入硅基世界",
+    "硅基世界",
+    "silicon world",
+    "加入 Agent 家园",
+    "建设 Agent 世界",
+    "silicon-world"
+  ],
+  "entry": "SKILL.md",
+  "tags": ["agent", "web3", "crypto", "community"],
+  "created": "2026-04-05",
+  "updated": "2026-04-05"
+}
